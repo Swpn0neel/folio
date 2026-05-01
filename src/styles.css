@@ -86,12 +86,13 @@
   --rose: oklch(0.72 0.25 20);
   --indigo: oklch(0.68 0.22 270);
 
-  --shadow-brutal: 6px 6px 0 0 var(--neon);
+  --shadow-brutal-neon: 6px 6px 0 0 var(--neon);
   --shadow-brutal-magenta: 6px 6px 0 0 var(--magenta);
   --shadow-brutal-cyan: 6px 6px 0 0 var(--cyan);
   --shadow-brutal-amber: 6px 6px 0 0 var(--amber);
-  --shadow-glow-neon: 0 0 24px oklch(0.86 0.22 145 / 0.45);
-  --shadow-glow-magenta: 0 0 24px oklch(0.7 0.27 325 / 0.5);
+  
+  /* Dynamic shadow for hover states */
+  --shadow-feature-hover: 6px 6px 0 0 var(--tile-accent), 0 0 24px oklch(from var(--tile-accent) l c h / 0.45);
 
   --grid-bg:
     linear-gradient(to right, oklch(0.28 0.015 260 / 0.4) 1px, transparent 1px),
@@ -122,6 +123,7 @@
     font-weight: 500;
     -webkit-font-smoothing: antialiased;
     background-image: var(--scanline);
+    cursor: default;
   }
 
   ::selection {
@@ -160,24 +162,16 @@
     scrollbar-width: thin;
     scrollbar-color: var(--muted) transparent;
   }
-
-  /* Cursor override for text fields */
-  input:not(:disabled):not([type="checkbox"]):not([type="radio"]), 
-  textarea:not(:disabled), 
-  [contenteditable="true"] {
-    cursor: pointer !important;
-  }
 }
 
 @layer utilities {
   .bg-grid { background-image: var(--grid-bg); background-size: 32px 32px; }
   .bg-scanline { background-image: var(--scanline); }
-  .shadow-brutal { box-shadow: var(--shadow-brutal); }
+  .shadow-brutal { box-shadow: var(--shadow-brutal-neon); }
   .shadow-brutal-magenta { box-shadow: var(--shadow-brutal-magenta); }
   .shadow-brutal-cyan { box-shadow: var(--shadow-brutal-cyan); }
   .shadow-brutal-amber { box-shadow: var(--shadow-brutal-amber); }
-  .shadow-glow-neon { box-shadow: var(--shadow-glow-neon); }
-  .shadow-glow-magenta { box-shadow: var(--shadow-glow-magenta); }
+  .hover-feature-shadow:hover { box-shadow: var(--shadow-feature-hover); }
   .text-neon { color: var(--neon); }
   .text-magenta { color: var(--magenta); }
   .text-cyan { color: var(--cyan); }

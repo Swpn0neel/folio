@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { GripVertical, Eye, EyeOff } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { GripVertical, Eye, EyeOff, Trash2 } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -17,23 +17,32 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { uid } from "@/lib/portfolio";
 
 const INITIAL_SECTIONS = [
-  { id: "profile", name: "profile", desc: "name · avatar · bio", on: true },
-  { id: "socials", name: "socials", desc: "github · x · linkedin · site", on: true },
-  { id: "projects", name: "projects", desc: "what you've built", on: true },
-  { id: "blogs", name: "blogs", desc: "what you've written", on: true },
-  { id: "experience", name: "experience", desc: "where you've worked", on: false },
-  { id: "achievements", name: "achievements", desc: "talks · awards · milestones", on: true },
+  { id: "profile", name: "profile", desc: "name · avatar · tagline", on: true, accent: "var(--neon)" },
+  { id: "bio", name: "bio", desc: "about you · in your words", on: true, accent: "var(--rose)" },
+  { id: "socials", name: "socials", desc: "github · x · linkedin · site", on: true, accent: "var(--cyan)" },
+  { id: "projects", name: "projects", desc: "what you've built", on: true, accent: "var(--neon)" },
+  { id: "blogs", name: "blogs", desc: "what you've written", on: true, accent: "var(--magenta)" },
+  { id: "experience", name: "experience", desc: "where you've worked", on: false, accent: "var(--indigo)" },
+  { id: "achievements", name: "achievements", desc: "talks · awards · milestones", on: true, accent: "var(--amber)" },
 ];
 
 export function SectionsShowcase() {
   const [sections, setSections] = useState(INITIAL_SECTIONS);
   const [mounted, setMounted] = useState(false);
+  const [addingCustom, setAddingCustom] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (addingCustom) inputRef.current?.focus();
+  }, [addingCustom]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -57,6 +66,29 @@ export function SectionsShowcase() {
     setSections((prev) =>
       prev.map((s) => (s.id === id ? { ...s, on: !s.on } : s))
     );
+  };
+
+
+  const removeSection = (id: string) => {
+    setSections((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const commitAdd = () => {
+    const t = newTitle.trim();
+    if (t) {
+      setSections((prev) => [
+        ...prev,
+        {
+          id: `custom:${uid()}`,
+          name: t,
+          desc: "0 items · custom section",
+          on: true,
+          accent: "var(--neon)",
+        },
+      ]);
+    }
+    setNewTitle("");
+    setAddingCustom(false);
   };
 
   return (
@@ -116,6 +148,7 @@ export function SectionsShowcase() {
                       key={s.id}
                       section={s}
                       onToggle={() => toggleSection(s.id)}
+                      onRemove={s.id.startsWith("custom:") ? () => removeSection(s.id) : undefined}
                     />
                   ))}
                 </SortableContext>
@@ -124,14 +157,14 @@ export function SectionsShowcase() {
               sections.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center gap-3 border border-transparent px-3 py-2.5"
+                  className="flex items-center gap-2 border border-transparent bg-background/50 px-2 py-2"
                 >
                   <GripVertical className="h-4 w-4 text-muted-foreground/60" />
                   <div className="flex-1 min-w-0">
                     <p className="font-mono text-sm">
                       <span className="text-neon">$</span> {s.name}
                     </p>
-                    <p className="text-xs font-mono text-muted-foreground">{s.desc}</p>
+                    <p className="text-xs font-mono text-muted-foreground truncate">{s.desc}</p>
                   </div>
                   <span
                     className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border ${
@@ -147,6 +180,47 @@ export function SectionsShowcase() {
               ))
             )}
           </div>
+
+          {/* Add custom section inline form - matching dashboard */}
+          <div className="mt-3 border-t border-dashed border-border p-3 pt-4">
+            {addingCustom ? (
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") commitAdd();
+                    if (e.key === "Escape") { setAddingCustom(false); setNewTitle(""); }
+                  }}
+                  placeholder="section title…"
+                  className="flex-1 bg-background border border-neon outline-none px-3 py-1.5 font-mono text-sm placeholder:text-muted-foreground/40 text-foreground"
+                />
+                <button
+                  type="button"
+                  onClick={commitAdd}
+                  className="px-3 py-1.5 bg-neon text-background font-mono text-xs font-bold hover:shadow-glow-neon transition-shadow shrink-0"
+                >
+                  add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAddingCustom(false); setNewTitle(""); }}
+                  className="px-3 py-1.5 border border-border font-mono text-xs text-muted-foreground hover:border-foreground transition-colors shrink-0"
+                >
+                  cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setAddingCustom(true)}
+                className="w-full flex items-center justify-center gap-1.5 border border-dashed border-border hover:border-neon hover:text-neon text-muted-foreground font-mono text-xs py-2 transition-colors"
+              >
+                <span className="text-neon text-sm leading-none">+</span> add custom section
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -156,9 +230,11 @@ export function SectionsShowcase() {
 function SortableItem({
   section,
   onToggle,
+  onRemove,
 }: {
   section: (typeof INITIAL_SECTIONS)[0];
   onToggle: () => void;
+  onRemove?: () => void;
 }) {
   const {
     attributes,
@@ -179,14 +255,14 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 border border-transparent hover:border-border hover:bg-secondary/50 px-3 py-2.5 transition-colors group relative ${
-        isDragging ? "bg-secondary border-neon/50 z-50 shadow-glow-neon" : ""
+      className={`flex items-center gap-2 border border-transparent hover:border-border bg-background/50 px-2 py-2 transition-colors group relative ${
+        isDragging ? "border-neon shadow-glow-neon z-50" : ""
       }`}
     >
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-muted-foreground/40 hover:text-foreground transition-colors"
+        className="cursor-grab active:cursor-grabbing text-muted-foreground/60 hover:text-foreground transition-colors"
         aria-label="Drag to reorder"
       >
         <GripVertical className="h-4 w-4" />
@@ -196,23 +272,57 @@ function SortableItem({
         <p className="font-mono text-sm">
           <span className="text-neon">$</span> {section.name}
         </p>
-        <p className="text-xs font-mono text-muted-foreground">{section.desc}</p>
+        <p className="text-xs font-mono text-muted-foreground truncate">{section.desc}</p>
       </div>
+
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-muted-foreground/40 hover:text-destructive transition-colors p-1"
+          title="remove custom section"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {/* Static Color Swatch */}
+      <ColorPicker 
+        value={section.accent} 
+      />
 
       <button
         onClick={(e) => {
           e.stopPropagation();
           onToggle();
         }}
-        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border transition-all hover:scale-105 active:scale-95 ${
+        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border transition-colors ${
           section.on
-            ? "border-neon text-neon bg-neon/5 shadow-glow-neon"
+            ? "border-neon text-neon"
             : "border-border text-muted-foreground hover:border-foreground"
         }`}
       >
         {section.on ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
         {section.on ? "on" : "off"}
       </button>
+    </div>
+  );
+}
+
+function ColorPicker({
+  value,
+}: {
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-1 px-1.5 py-1 border border-border opacity-60 group-hover:opacity-100 transition-opacity">
+      <span
+        className="block h-2.5 w-2.5 rounded-full border border-white/10 shrink-0"
+        style={{ background: value }}
+      />
+      <svg className="h-2 w-2 text-muted-foreground" viewBox="0 0 8 8" fill="none">
+        <path d="M1.5 3L4 5.5L6.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
     </div>
   );
 }

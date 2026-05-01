@@ -9,12 +9,12 @@ const features = [
   { icon: Rocket, key: "ship", title: "ship instantly", desc: "no deploys. no dns. save → live worldwide on the edge.", color: "neon" },
 ];
 
-const colorMap: Record<string, { text: string; border: string; shadow: string }> = {
-  neon: { text: "text-neon", border: "hover:border-neon", shadow: "hover:shadow-brutal" },
-  magenta: { text: "text-magenta", border: "hover:border-magenta", shadow: "hover:shadow-brutal-magenta" },
-  cyan: { text: "text-cyan", border: "hover:border-cyan", shadow: "hover:shadow-brutal-cyan" },
-  amber: { text: "text-amber", border: "hover:border-amber", shadow: "hover:shadow-brutal-amber" },
-  violet: { text: "text-violet", border: "hover:border-magenta", shadow: "hover:shadow-brutal-magenta" },
+const colorMap: Record<string, { text: string; border: string; accent: string }> = {
+  neon: { text: "text-neon", border: "hover:border-neon", accent: "var(--neon)" },
+  magenta: { text: "text-magenta", border: "hover:border-magenta", accent: "var(--magenta)" },
+  cyan: { text: "text-cyan", border: "hover:border-cyan", accent: "var(--cyan)" },
+  amber: { text: "text-amber", border: "hover:border-amber", accent: "var(--amber)" },
+  violet: { text: "text-violet", border: "hover:border-violet", accent: "var(--violet)" },
 };
 
 export function Features() {
@@ -30,24 +30,40 @@ export function Features() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border overflow-hidden">
           {features.map((f, i) => {
             const c = colorMap[f.color];
             return (
               <div
                 key={f.key}
-                className={`group relative bg-card p-7 transition-all duration-200 ${c.border} ${c.shadow} hover:z-10 hover:-translate-x-0.5 hover:-translate-y-0.5`}
+                style={{ "--tile-accent": c.accent } as React.CSSProperties}
+                className={`group relative bg-card p-8 transition-all duration-300 ${c.border} hover:z-10 hover-feature-shadow cursor-pointer`}
               >
-                <div className="flex items-center justify-between mb-5">
-                  <f.icon className={`h-6 w-6 ${c.text}`} />
-                  <span className="font-mono text-[10px] text-muted-foreground">
+                {/* Corner Accent */}
+                <div className="absolute top-0 right-0 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <div className="absolute top-2 right-2 w-full h-[1px] bg-[var(--tile-accent)]" />
+                  <div className="absolute top-2 right-2 w-[1px] h-full bg-[var(--tile-accent)]" />
+                </div>
+
+                <div className="flex items-center justify-between mb-6">
+                  <div className={`p-2 border border-transparent group-hover:border-[var(--tile-accent)] transition-colors duration-300`}>
+                    <f.icon className={`h-6 w-6 ${c.text} transition-transform duration-300 group-hover:scale-110`} />
+                  </div>
+                  <span className="font-mono text-[10px] text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity">
                     [{String(i + 1).padStart(2, "0")}]
                   </span>
                 </div>
-                <h3 className="font-mono text-base font-bold mb-2">
-                  <span className={c.text}>{">"}</span> {f.title}
+
+                <h3 className="font-mono text-base font-bold mb-3 flex items-center gap-2">
+                  <span className={c.text}>{">"}</span>
+                  {f.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors duration-300">
+                  {f.desc}
+                </p>
+
+                {/* Bottom decorative bar */}
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-[var(--tile-accent)] transition-all duration-500 group-hover:w-full" />
               </div>
             );
           })}

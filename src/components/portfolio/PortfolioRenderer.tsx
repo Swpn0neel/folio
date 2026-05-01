@@ -1,4 +1,4 @@
-import { Github, Twitter, Linkedin, Globe, ExternalLink, Award, Briefcase, BookOpen, FolderGit2, Link2, Mail, CircleHelp, LayoutTemplate } from "lucide-react";
+import { Github, Twitter, Linkedin, Globe, ExternalLink, Award, Briefcase, BookOpen, FolderGit2, Link2, Mail, Fingerprint, LayoutTemplate } from "lucide-react";
 import type { Portfolio, SectionId } from "@/lib/portfolio";
 
 /** Maps a sectionColor key to its CSS variable string */
@@ -57,7 +57,7 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
       return <ProfileBlock p={portfolio} accentCss={accentCss} />;
     case "bio":
       return portfolio.bio ? (
-        <Block icon={CircleHelp} label="about" accentCss={accentCss}>
+        <Block icon={Fingerprint} label="about" accentCss={accentCss}>
           <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
             {portfolio.bio}
           </p>
@@ -159,14 +159,16 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
 
   return (
     <div className="border border-border bg-card shadow-brutal flex flex-col h-full overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-secondary shrink-0 z-10">
+    <div className="relative flex items-center h-10 px-4 border-b border-border bg-secondary shrink-0 z-10">
+      <div className="flex items-center gap-2 shrink-0">
         <span className="h-3 w-3 bg-destructive" />
         <span className="h-3 w-3 bg-amber" />
         <span className="h-3 w-3 bg-neon" />
-        <div className="ml-3 flex-1 max-w-md mx-auto border border-border bg-background px-3 py-0.5 text-xs font-mono text-muted-foreground text-center truncate">
-          <span className="text-neon">https://</span>folio.dev/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
-        </div>
       </div>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[180px] sm:max-w-md border border-border bg-background px-3 py-0.5 text-xs font-mono text-muted-foreground text-center truncate">
+        <span className="text-neon">https://</span>folio.dev/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
+      </div>
+    </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         {inner}
       </div>
