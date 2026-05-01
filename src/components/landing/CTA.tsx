@@ -17,7 +17,7 @@ export function CTA() {
               <span className="text-amber">// </span> your handle is waiting
             </p>
             <h2 className="font-mono text-3xl md:text-5xl font-bold tracking-tight leading-tight">
-              <span className="text-muted-foreground">$</span> install{" "}
+              <span className="text-muted-foreground">$</span> get{" "}
               <span className="text-neon">folio</span>
               <br />
               {/* <span className="text-magenta">→</span> ship in 60s<span className="animate-blink text-neon">_</span> */}

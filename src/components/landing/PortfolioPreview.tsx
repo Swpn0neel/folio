@@ -124,7 +124,7 @@ function Item({ title, meta, desc }: { title: string; meta: string; desc?: strin
     <div className="group flex items-start justify-between gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
       <div className="min-w-0">
         <p className="font-mono text-sm font-medium truncate">{title}</p>
-        <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{meta}</p>
+        <p className="text-xs font-mono text-muted-foreground mt-0.5">{meta}</p>
         {desc && <p className="text-xs text-muted-foreground mt-1">{desc}</p>}
       </div>
       <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />

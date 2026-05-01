@@ -69,7 +69,7 @@ function PublicPortfolio() {
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
-        <PortfolioRenderer portfolio={portfolio} />
+        <PortfolioRenderer portfolio={portfolio} framed={false} />
         <p className="mt-6 text-center font-mono text-[11px] text-muted-foreground">
           <span className="text-neon">●</span> built with{" "}
           <Link to="/" className="hover:text-neon underline">folio</Link> · ship yours in 60s

@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
@@ -14,7 +14,7 @@
   --radius-4xl: 0px;
 
   --font-display: "JetBrains Mono", ui-monospace, monospace;
-  --font-sans: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --color-background: var(--background);
@@ -43,6 +43,8 @@
   --color-cyan: var(--cyan);
   --color-amber: var(--amber);
   --color-violet: var(--violet);
+  --color-rose: var(--rose);
+  --color-indigo: var(--indigo);
 }
 
 :root {
@@ -81,6 +83,8 @@
   --cyan: oklch(0.85 0.16 200);
   --amber: oklch(0.82 0.18 80);
   --violet: oklch(0.65 0.22 290);
+  --rose: oklch(0.72 0.25 20);
+  --indigo: oklch(0.68 0.22 270);
 
   --shadow-brutal: 6px 6px 0 0 var(--neon);
   --shadow-brutal-magenta: 6px 6px 0 0 var(--magenta);
@@ -114,7 +118,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     background-image: var(--scanline);
   }
@@ -127,6 +132,40 @@
   h1, h2, h3, h4 {
     font-family: var(--font-mono);
     letter-spacing: -0.01em;
+  }
+
+  /* Subtle Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border);
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
+  }
+
+  /* Cursor override for text fields */
+  input:not(:disabled):not([type="checkbox"]):not([type="radio"]), 
+  textarea:not(:disabled), 
+  [contenteditable="true"] {
+    cursor: pointer !important;
   }
 }
 
@@ -144,6 +183,8 @@
   .text-cyan { color: var(--cyan); }
   .text-amber { color: var(--amber); }
   .text-violet { color: var(--violet); }
+  .text-rose { color: var(--rose); }
+  .text-indigo { color: var(--indigo); }
   .bg-neon { background-color: var(--neon); }
   .bg-magenta { background-color: var(--magenta); }
   .bg-cyan { background-color: var(--cyan); }
@@ -153,6 +194,13 @@
   .border-cyan { border-color: var(--cyan); }
   .font-display { font-family: var(--font-mono); }
   .font-mono { font-family: var(--font-mono); }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes blink {

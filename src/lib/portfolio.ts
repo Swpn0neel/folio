@@ -1,10 +1,28 @@
-export type SectionId =
+export type BuiltInSectionId =
   | "profile"
+  | "bio"
   | "socials"
   | "projects"
   | "blogs"
   | "experience"
   | "achievements";
+
+// SectionId is widened to string to accommodate dynamic custom section IDs ("custom:<uid>")
+export type SectionId = BuiltInSectionId | string;
+
+export type CustomSectionItem = {
+  id: string;
+  title: string;
+  subheading?: string;
+  link?: string;
+  description?: string;
+};
+
+export type CustomSection = {
+  id: string; // matches the SectionId "custom:<uid>"
+  title: string; // user-defined section title
+  items: CustomSectionItem[];
+};
 
 export type Social = {
   id: string;
@@ -31,7 +49,10 @@ export type Experience = {
   id: string;
   role: string;
   company: string;
-  period: string; // "2023 — Present"
+  startDate?: string;
+  endDate?: string;
+  isCurrent?: boolean;
+  period?: string; // Keep for legacy, but we'll prefer dates
   description?: string;
 };
 
@@ -43,21 +64,26 @@ export type Achievement = {
 
 export type Portfolio = {
   handle: string;
+  showHandle: boolean;
   fullName: string;
   avatarUrl: string;
   tagline: string;
   bio: string;
-  enabled: Record<SectionId, boolean>;
+  enabled: Record<string, boolean>;
   order: SectionId[];
   socials: Social[];
   projects: Project[];
   blogs: Blog[];
   experience: Experience[];
   achievements: Achievement[];
+  customSections: CustomSection[];
+  /** per-section accent color key, e.g. "neon" | "cyan" | … */
+  sectionColors: Record<string, string>;
 };
 
-export const ALL_SECTIONS: SectionId[] = [
+export const BUILT_IN_SECTIONS: BuiltInSectionId[] = [
   "profile",
+  "bio",
   "socials",
   "projects",
   "blogs",
@@ -65,32 +91,50 @@ export const ALL_SECTIONS: SectionId[] = [
   "achievements",
 ];
 
-export const SECTION_META: Record<SectionId, { label: string; desc: string; accent: string }> = {
-  profile: { label: "profile", desc: "name · avatar · bio", accent: "text-neon" },
+/** @deprecated use BUILT_IN_SECTIONS */
+export const ALL_SECTIONS = BUILT_IN_SECTIONS;
+
+export const SECTION_META: Record<BuiltInSectionId, { label: string; desc: string; accent: string }> = {
+  profile: { label: "profile", desc: "name · avatar · tagline", accent: "text-neon" },
+  bio: { label: "bio", desc: "about you · in your words", accent: "text-rose" },
   socials: { label: "socials", desc: "github · x · linkedin · site", accent: "text-cyan" },
   projects: { label: "projects", desc: "what you've built", accent: "text-neon" },
   blogs: { label: "blogs", desc: "what you've written", accent: "text-magenta" },
-  experience: { label: "experience", desc: "where you've worked", accent: "text-cyan" },
+  experience: { label: "experience", desc: "where you've worked", accent: "text-indigo" },
   achievements: { label: "achievements", desc: "talks · awards · milestones", accent: "text-amber" },
 };
+
+/** Returns metadata for any section ID, falling back gracefully for custom sections. */
+export function getSectionMeta(id: SectionId, customSections: CustomSection[]): { label: string; desc: string; accent: string } {
+  if (id in SECTION_META) return SECTION_META[id as BuiltInSectionId];
+  const custom = customSections.find((s) => s.id === id);
+  return {
+    label: custom?.title || "custom",
+    desc: `${custom?.items.length ?? 0} item${(custom?.items.length ?? 0) !== 1 ? "s" : ""} · custom section`,
+    accent: "text-magenta",
+  };
+}
 
 const STORAGE_KEY = "folio:portfolio";
 
 export const defaultPortfolio = (): Portfolio => ({
   handle: "you",
+  showHandle: true,
   fullName: "Your Name",
   avatarUrl: "",
   tagline: "engineer · builder · writer",
-  bio: "// write a short, sharp bio. what do you build, what do you care about?",
+  bio: "",
   enabled: {
     profile: true,
+    bio: true,
     socials: true,
     projects: true,
     blogs: true,
     experience: false,
     achievements: false,
   },
-  order: ["profile", "socials", "projects", "blogs", "experience", "achievements"],
+  sectionColors: {},
+  order: ["profile", "bio", "socials", "projects", "blogs", "experience", "achievements"],
   socials: [
     { id: "s1", label: "github", url: "https://github.com/" },
   ],
@@ -106,6 +150,7 @@ export const defaultPortfolio = (): Portfolio => ({
   blogs: [],
   experience: [],
   achievements: [],
+  customSections: [],
 });
 
 export function loadPortfolio(): Portfolio {
@@ -115,17 +160,42 @@ export function loadPortfolio(): Portfolio {
     if (!raw) return defaultPortfolio();
     const parsed = JSON.parse(raw) as Partial<Portfolio>;
     const base = defaultPortfolio();
+    let order = parsed.order && parsed.order.length ? parsed.order : base.order;
+    // Migrate: inject "bio" after "profile" if missing from saved order
+    if (!order.includes("bio")) {
+      const profileIdx = order.indexOf("profile");
+      order = [
+        ...order.slice(0, profileIdx + 1),
+        "bio",
+        ...order.slice(profileIdx + 1),
+      ];
+    }
     // Merge defensively against schema drift
+    const customSections: CustomSection[] = parsed.customSections ?? [];
+    // Ensure any custom section IDs present in customSections are represented in order / enabled
+    const customIds = customSections.map((s) => s.id);
+    const mergedOrder = [
+      ...order.filter((id) => !id.startsWith("custom:")),
+      ...customIds.filter((id) => order.includes(id)),
+      ...customIds.filter((id) => !order.includes(id)), // newly added
+    ];
+    const customEnabled: Record<string, boolean> = {};
+    for (const id of customIds) {
+      customEnabled[id] = parsed.enabled?.[id] ?? true;
+    }
     return {
       ...base,
       ...parsed,
-      enabled: { ...base.enabled, ...(parsed.enabled ?? {}) },
-      order: parsed.order && parsed.order.length ? parsed.order : base.order,
+      handle: parsed.handle || base.handle, // Fallback to "you" if empty
+      enabled: { ...base.enabled, ...(parsed.enabled ?? {}), ...customEnabled },
+      sectionColors: parsed.sectionColors ?? {},
+      order: mergedOrder,
       socials: parsed.socials ?? [],
       projects: parsed.projects ?? [],
       blogs: parsed.blogs ?? [],
       experience: parsed.experience ?? [],
       achievements: parsed.achievements ?? [],
+      customSections,
     };
   } catch {
     return defaultPortfolio();
