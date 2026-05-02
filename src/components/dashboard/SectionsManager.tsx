@@ -3,18 +3,79 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Eye, EyeOff, GripVertical, Trash2 } from "lucide-react";
-import { getSectionMeta, type CustomSection, type SectionId } from "@/lib/portfolio";
+import { getSectionMeta, type CustomSection, type PortfolioThemeId, type SectionId } from "@/lib/portfolio";
 
 // ─── Colour palette ────────────────────────────────────────────────────────────
+type SectionColor = { key: string; label: string; css: string };
+
 /** Color options the user can pick per section. */
-export const SECTION_COLORS: { key: string; label: string; css: string }[] = [
-  { key: "neon",    label: "neon",     css: "var(--neon)"    },
-  { key: "cyan",    label: "cyan",     css: "var(--cyan)"    },
-  { key: "magenta", label: "magenta",  css: "var(--magenta)" },
-  { key: "amber",   label: "amber",    css: "var(--amber)"   },
-  { key: "indigo",  label: "indigo",   css: "var(--indigo)"  },
-  { key: "rose",    label: "rose",     css: "var(--rose)"    },
+export const SECTION_COLOR_GROUPS: Record<PortfolioThemeId, SectionColor[]> = {
+  terminal: [
+    { key: "neon", label: "neon", css: "var(--neon)" },
+    { key: "cyan", label: "cyan", css: "var(--cyan)" },
+    { key: "magenta", label: "magenta", css: "var(--magenta)" },
+    { key: "amber", label: "amber", css: "var(--amber)" },
+    { key: "indigo", label: "indigo", css: "var(--indigo)" },
+    { key: "rose", label: "rose", css: "var(--rose)" },
+  ],
+  vercel: [
+    { key: "graphite", label: "graphite", css: "oklch(0.22 0.02 255)" },
+    { key: "zinc", label: "zinc", css: "oklch(0.50 0.02 255)" },
+    { key: "vercelBlue", label: "blue", css: "oklch(0.56 0.19 255)" },
+    { key: "vercelGreen", label: "green", css: "oklch(0.58 0.14 155)" },
+    { key: "vercelViolet", label: "violet", css: "oklch(0.58 0.17 292)" },
+    { key: "vercelRed", label: "red", css: "oklch(0.58 0.18 25)" },
+  ],
+  vercelDark: [
+    { key: "darkSilver", label: "silver", css: "oklch(0.84 0.03 255)" },
+    { key: "darkBlue", label: "blue", css: "oklch(0.72 0.16 245)" },
+    { key: "darkMint", label: "mint", css: "oklch(0.78 0.14 165)" },
+    { key: "darkViolet", label: "violet", css: "oklch(0.74 0.18 300)" },
+    { key: "darkAmber", label: "amber", css: "oklch(0.82 0.15 85)" },
+    { key: "darkRose", label: "rose", css: "oklch(0.72 0.19 20)" },
+  ],
+  material: [
+    { key: "lavender", label: "lavender", css: "oklch(0.62 0.17 305)" },
+    { key: "blossom", label: "blossom", css: "oklch(0.74 0.16 350)" },
+    { key: "seafoam", label: "seafoam", css: "oklch(0.78 0.13 170)" },
+    { key: "daySky", label: "day sky", css: "oklch(0.73 0.12 235)" },
+    { key: "sunset", label: "sunset", css: "oklch(0.76 0.16 45)" },
+    { key: "marigold", label: "marigold", css: "oklch(0.82 0.15 90)" },
+  ],
+  editorial: [
+    { key: "charcoal", label: "charcoal", css: "oklch(0.24 0.03 255)" },
+    { key: "ochre", label: "ochre", css: "oklch(0.58 0.13 75)" },
+    { key: "brick", label: "brick", css: "oklch(0.50 0.15 32)" },
+    { key: "forest", label: "forest", css: "oklch(0.42 0.10 155)" },
+    { key: "navy", label: "navy", css: "oklch(0.36 0.10 255)" },
+    { key: "plum", label: "plum", css: "oklch(0.42 0.12 320)" },
+  ],
+  studio: [
+    { key: "hotPink", label: "hot pink", css: "oklch(0.69 0.25 358)" },
+    { key: "electricBlue", label: "electric blue", css: "oklch(0.72 0.18 235)" },
+    { key: "acid", label: "acid", css: "oklch(0.86 0.22 125)" },
+    { key: "tangerine", label: "tangerine", css: "oklch(0.74 0.20 50)" },
+    { key: "ultraviolet", label: "ultraviolet", css: "oklch(0.66 0.24 300)" },
+    { key: "laserAqua", label: "laser aqua", css: "oklch(0.82 0.15 190)" },
+  ],
+};
+
+const LEGACY_SECTION_COLORS: SectionColor[] = [
+  { key: "emerald", label: "emerald", css: "oklch(0.72 0.20 155)" },
+  { key: "lime", label: "lime", css: "oklch(0.84 0.20 125)" },
+  { key: "sky", label: "sky", css: "oklch(0.72 0.17 235)" },
+  { key: "blue", label: "blue", css: "oklch(0.62 0.22 255)" },
+  { key: "purple", label: "purple", css: "oklch(0.64 0.23 305)" },
+  { key: "pink", label: "pink", css: "oklch(0.72 0.24 350)" },
+  { key: "coral", label: "coral", css: "oklch(0.72 0.20 35)" },
+  { key: "orange", label: "orange", css: "oklch(0.76 0.19 55)" },
+  { key: "gold", label: "gold", css: "oklch(0.82 0.16 95)" },
+  { key: "mint", label: "mint", css: "oklch(0.82 0.14 170)" },
+  { key: "teal", label: "teal", css: "oklch(0.70 0.15 190)" },
+  { key: "slate", label: "slate", css: "oklch(0.55 0.05 255)" },
 ];
+
+export const SECTION_COLORS = [...Object.values(SECTION_COLOR_GROUPS).flat(), ...LEGACY_SECTION_COLORS];
 
 /** Resolves the CSS var string for a colour key. */
 export function colorToCss(key: string): string {
@@ -22,6 +83,7 @@ export function colorToCss(key: string): string {
 }
 
 type Props = {
+  theme: PortfolioThemeId;
   order: SectionId[];
   enabled: Record<string, boolean>;
   sectionColors: Record<string, string>;
@@ -34,7 +96,7 @@ type Props = {
 };
 
 export function SectionsManager({
-  order, enabled, sectionColors, customSections,
+  theme, order, enabled, sectionColors, customSections,
   onReorder, onToggle, onColorChange, onRemoveCustom, onAddCustom,
 }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -115,6 +177,7 @@ export function SectionsManager({
                 id={id}
                 on={enabled[id]}
                 color={sectionColors[id] ?? "default"}
+                theme={theme}
                 customSections={customSections}
                 onToggle={() => onToggle(id)}
                 onColorChange={(c) => onColorChange(id, c)}
@@ -173,11 +236,13 @@ export function SectionsManager({
 function ColorPicker({
   value,
   defaultCss,
+  theme,
   onChange,
 }: {
   value: string;
   /** CSS var string for this section's built-in accent, shown when no custom colour is picked yet */
   defaultCss: string;
+  theme: PortfolioThemeId;
   onChange: (key: string) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -185,6 +250,7 @@ function ColorPicker({
   // If user has picked a colour, show that. Otherwise fall back to the section's own default accent.
   const current = SECTION_COLORS.find((c) => c.key === value);
   const activeCss = current ? current.css : defaultCss;
+  const colors = SECTION_COLOR_GROUPS[theme] ?? SECTION_COLOR_GROUPS.terminal;
 
   // Close on outside click
   useEffect(() => {
@@ -220,9 +286,9 @@ function ColorPicker({
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 z-50 border border-border bg-card shadow-brutal py-1 min-w-[130px]"
+          className="absolute right-0 top-full mt-1 z-50 max-h-72 min-w-[150px] overflow-y-auto border border-border bg-card py-1 shadow-brutal"
         >
-          {SECTION_COLORS.map((c) => (
+          {colors.map((c) => (
             <button
               key={c.key}
               type="button"
@@ -249,11 +315,12 @@ function ColorPicker({
 
 // ─── Sortable row ──────────────────────────────────────────────────────────
 function SortableRow({
-  id, on, color, customSections, onToggle, onColorChange, onRemove,
+  id, on, color, theme, customSections, onToggle, onColorChange, onRemove,
 }: {
   id: SectionId;
   on: boolean;
   color: string;
+  theme: PortfolioThemeId;
   customSections: CustomSection[];
   onToggle: () => void;
   onColorChange: (key: string) => void;
@@ -298,7 +365,7 @@ function SortableRow({
         </button>
       )}
       {/* Colour picker — left of the on/off button */}
-      <ColorPicker value={color} defaultCss={defaultAccentCss} onChange={onColorChange} />
+      <ColorPicker value={color} defaultCss={defaultAccentCss} theme={theme} onChange={onColorChange} />
       <button
         type="button"
         onClick={onToggle}

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2 } from "lucide-react";
+import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2, Palette } from "lucide-react";
 import {
   defaultPortfolio,
   loadPortfolio,
@@ -10,11 +10,16 @@ import {
   type SectionId,
   type CustomSection,
   type CustomSectionItem,
+  type CustomSectionTemplate,
+  CUSTOM_SECTION_TEMPLATES,
+  PORTFOLIO_THEMES,
+  getCustomSectionTemplateMeta,
+  type PortfolioThemeId,
 } from "@/lib/portfolio";
 import { Field, TextField } from "@/components/dashboard/Field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ListEditor } from "@/components/dashboard/ListEditor";
-import { SectionsManager } from "@/components/dashboard/SectionsManager";
+import { colorToCss, SECTION_COLOR_GROUPS, SECTION_COLORS, SectionsManager } from "@/components/dashboard/SectionsManager";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
 
 const getSocialIcon = (label: string) => {
@@ -70,6 +75,34 @@ function Dashboard() {
   const setSectionColor = (id: string, color: string) =>
     setPortfolio((p) => ({ ...p, sectionColors: { ...p.sectionColors, [id]: color } }));
 
+  const remapSectionColorsForTheme = (
+    sectionColors: Record<string, string>,
+    fromTheme: PortfolioThemeId,
+    toTheme: PortfolioThemeId,
+  ) => {
+    const fromColors = SECTION_COLOR_GROUPS[fromTheme] ?? SECTION_COLOR_GROUPS.terminal;
+    const toColors = SECTION_COLOR_GROUPS[toTheme] ?? SECTION_COLOR_GROUPS.terminal;
+    return Object.fromEntries(
+      Object.entries(sectionColors).map(([sectionId, colorKey]) => {
+        const groupedIndex = fromColors.findIndex((color) => color.key === colorKey);
+        const fallbackIndex = SECTION_COLORS.findIndex((color) => color.key === colorKey);
+        const index = groupedIndex >= 0 ? groupedIndex : Math.max(0, fallbackIndex % toColors.length);
+        return [sectionId, toColors[index]?.key ?? toColors[0].key];
+      })
+    );
+  };
+
+  const changeTheme = (theme: PortfolioThemeId) =>
+    setPortfolio((p) => {
+      const currentTheme = p.theme ?? "terminal";
+      if (currentTheme === theme) return p;
+      return {
+        ...p,
+        theme,
+        sectionColors: remapSectionColorsForTheme(p.sectionColors ?? {}, currentTheme, theme),
+      };
+    });
+
   /** Resolve inline shadow CSS var from a section's chosen color key, with per-section defaults. */
   const sectionDefaultAccent: Record<string, string> = {
     profile:      "var(--neon)",
@@ -80,13 +113,9 @@ function Dashboard() {
     experience:   "var(--indigo)",
     achievements: "var(--amber)",
   };
-  const colorKeyToCss: Record<string, string> = {
-    neon: "var(--neon)", cyan: "var(--cyan)", magenta: "var(--magenta)",
-    amber: "var(--amber)", indigo: "var(--indigo)", rose: "var(--rose)",
-  };
   const sc = (id: string) => {
     const key = portfolio.sectionColors?.[id];
-    return (key && colorKeyToCss[key]) ? colorKeyToCss[key] : (sectionDefaultAccent[id] ?? "var(--neon)");
+    return key ? colorToCss(key) : (sectionDefaultAccent[id] ?? "var(--neon)");
   };
 
   const reset = () => {
@@ -134,7 +163,7 @@ function Dashboard() {
 
   const addCustomSection = (title: string) => {
     const id = `custom:${uid()}`;
-    const section: CustomSection = { id, title, items: [] };
+    const section: CustomSection = { id, title, template: "simple", items: [] };
     setPortfolio((p) => ({
       ...p,
       customSections: [...(p.customSections ?? []), section],
@@ -159,13 +188,26 @@ function Dashboard() {
       enabled: Object.fromEntries(Object.entries(p.enabled).filter(([k]) => k !== sectionId)),
     }));
 
+  const createCustomItem = (template: CustomSectionTemplate): CustomSectionItem => ({
+    id: uid(),
+    title: "",
+    subheading: "",
+    meta: "",
+    link: "",
+    description: "",
+    date: template === "timeline" ? "" : undefined,
+    imageUrl: template === "gallery" ? "" : undefined,
+    value: template === "stats" ? "" : undefined,
+  });
+
   const addCustomItem = (sectionId: string) => {
-    const item: CustomSectionItem = { id: uid(), title: "", subheading: "", link: "", description: "" };
     setPortfolio((p) => ({
       ...p,
-      customSections: (p.customSections ?? []).map((s) =>
-        s.id === sectionId ? { ...s, items: [...s.items, item] } : s
-      ),
+      customSections: (p.customSections ?? []).map((s) => {
+        if (s.id !== sectionId) return s;
+        const template = s.template ?? "simple";
+        return { ...s, items: [...s.items, createCustomItem(template)] };
+      }),
     }));
   };
 
@@ -193,8 +235,7 @@ function Dashboard() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-mono font-bold text-sm shrink-0">
-            <TerminalSquare className="h-5 w-5 text-neon" />
-            <span className="hidden sm:inline">~/folio</span>
+            <span>~/folio</span>
             <span className="text-muted-foreground hidden sm:inline">/dashboard</span>
           </Link>
           <div className="flex items-center gap-2 text-xs font-mono">
@@ -243,6 +284,7 @@ function Dashboard() {
           {/* Sections manager */}
           <Card title="sections" subtitle="toggle & drag to reorder">
             <SectionsManager
+              theme={portfolio.theme ?? "terminal"}
               order={portfolio.order}
               enabled={portfolio.enabled}
               sectionColors={portfolio.sectionColors ?? {}}
@@ -252,6 +294,13 @@ function Dashboard() {
               onColorChange={setSectionColor}
               onRemoveCustom={removeCustomSection}
               onAddCustom={addCustomSection}
+            />
+          </Card>
+
+          <Card title="theme" subtitle="choose portfolio presentation">
+            <ThemePicker
+              value={portfolio.theme ?? "terminal"}
+              onChange={changeTheme}
             />
           </Card>
 
@@ -534,15 +583,29 @@ function Dashboard() {
             <Card key={section.id} title={section.title || "untitled section"} subtitle="custom section" shadowCss={sc(section.id)}>
               <div className="space-y-4">
                 {/* Section title */}
-                <Field
-                  label="section title"
-                  value={section.title}
-                  onChange={(e) => updateCustomSection(section.id, { title: e.target.value })}
-                  placeholder="e.g. certifications, publications, volunteer…"
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_220px] gap-3">
+                  <Field
+                    label="section title"
+                    value={section.title}
+                    onChange={(e) => updateCustomSection(section.id, { title: e.target.value })}
+                    placeholder="e.g. certifications, publications, volunteer…"
+                  />
+                  <TemplateSelect
+                    value={section.template ?? "simple"}
+                    onChange={(template) => updateCustomSection(section.id, { template })}
+                  />
+                </div>
 
                 {/* Items */}
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-magenta">
+                      {">"} {getCustomSectionTemplateMeta(section.template ?? "simple").label}
+                    </h3>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {getCustomSectionTemplateMeta(section.template ?? "simple").desc}
+                    </p>
+                  </div>
                   {section.items.map((item, idx) => (
                     <div key={item.id} className="border border-border/60 p-3 space-y-3 bg-background/50">
                       <div className="flex items-center justify-between">
@@ -558,39 +621,11 @@ function Dashboard() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field
-                          label="title"
-                          value={item.title}
-                          onChange={(e) => updateCustomItem(section.id, item.id, { title: e.target.value })}
-                          placeholder="e.g. AWS Solutions Architect"
-                        />
-                        <Field
-                          label="sub-heading"
-                          hint="optional"
-                          value={item.subheading ?? ""}
-                          onChange={(e) => updateCustomItem(section.id, item.id, { subheading: e.target.value })}
-                          placeholder="e.g. Amazon Web Services · 2024"
-                        />
-                        <div className="sm:col-span-2">
-                          <Field
-                            label="link"
-                            hint="optional"
-                            value={item.link ?? ""}
-                            onChange={(e) => updateCustomItem(section.id, item.id, { link: e.target.value })}
-                            placeholder="https://..."
-                          />
-                        </div>
-                        <div className="sm:col-span-2">
-                          <TextField
-                            label="description"
-                            hint="optional"
-                            value={item.description ?? ""}
-                            onChange={(e) => updateCustomItem(section.id, item.id, { description: e.target.value })}
-                            placeholder="a short description of this item…"
-                          />
-                        </div>
-                      </div>
+                      <CustomItemFields
+                        template={section.template ?? "simple"}
+                        item={item}
+                        onChange={(patch) => updateCustomItem(section.id, item.id, patch)}
+                      />
                     </div>
                   ))}
 
@@ -625,6 +660,302 @@ function Dashboard() {
             <PortfolioRenderer portfolio={portfolio} />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ThemePicker({
+  value,
+  onChange,
+}: {
+  value: PortfolioThemeId;
+  onChange: (value: PortfolioThemeId) => void;
+}) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {PORTFOLIO_THEMES.map((theme) => {
+        const active = value === theme.id;
+        return (
+          <button
+            key={theme.id}
+            type="button"
+            onClick={() => onChange(theme.id)}
+            className={`group text-left border px-3 py-3 bg-background transition-colors ${
+              active ? "border-neon shadow-brutal" : "border-border hover:border-cyan"
+            }`}
+            aria-pressed={active}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-xs font-bold uppercase tracking-widest">
+                <Palette className="mr-1.5 inline h-3.5 w-3.5 text-cyan" />
+                {theme.label}
+              </span>
+              <span className={`h-2 w-2 shrink-0 ${active ? "bg-neon" : "bg-muted"}`} />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{theme.desc}</p>
+            <ThemeSwatches id={theme.id} />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ThemeSwatches({ id }: { id: PortfolioThemeId }) {
+  const swatches: Record<PortfolioThemeId, string[]> = {
+    terminal: ["var(--neon)", "var(--magenta)", "var(--cyan)"],
+    vercel: ["#050505", "#fafafa", "#a1a1aa"],
+    vercelDark: ["#050505", "#27272a", "#f4f4f5"],
+    material: ["#6750a4", "#ffb1c8", "#8bd8bd"],
+    editorial: ["#111827", "#d97706", "#f8fafc"],
+    studio: ["#111111", "#f43f5e", "#38bdf8"],
+  };
+
+  return (
+    <div className="mt-3 flex items-center gap-1.5">
+      {swatches[id].map((color) => (
+        <span
+          key={color}
+          className="h-2.5 w-8 border border-border"
+          style={{ background: color }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function TemplateSelect({
+  value,
+  onChange,
+}: {
+  value: CustomSectionTemplate;
+  onChange: (value: CustomSectionTemplate) => void;
+}) {
+  const meta = getCustomSectionTemplateMeta(value);
+
+  return (
+    <label className="block">
+      <div className="flex items-center justify-between min-h-[18px]">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span className="text-amber">▸</span> template
+        </span>
+      </div>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as CustomSectionTemplate)}
+        className="mt-1 w-full bg-background border border-border focus:border-neon outline-none px-3 py-2 font-mono text-sm text-foreground transition-colors"
+        aria-label="custom section template"
+      >
+        {CUSTOM_SECTION_TEMPLATES.map((template) => (
+          <option key={template.id} value={template.id}>
+            {template.label}
+          </option>
+        ))}
+      </select>
+      <p className="mt-1 font-mono text-[10px] text-muted-foreground/60 truncate">{meta.desc}</p>
+    </label>
+  );
+}
+
+function CustomItemFields({
+  template,
+  item,
+  onChange,
+}: {
+  template: CustomSectionTemplate;
+  item: CustomSectionItem;
+  onChange: (patch: Partial<CustomSectionItem>) => void;
+}) {
+  const metaValue = item.meta ?? item.subheading ?? "";
+  const updateMeta = (meta: string) => onChange({ meta, subheading: meta });
+
+  if (template === "linkCards") {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field
+          label="title"
+          value={item.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="e.g. Open source starter"
+        />
+        <Field
+          label="url"
+          hint="required for click"
+          value={item.link ?? ""}
+          onChange={(e) => onChange({ link: e.target.value })}
+          placeholder="https://..."
+        />
+        <div className="sm:col-span-2">
+          <TextField
+            label="description"
+            hint="optional"
+            value={item.description ?? ""}
+            onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="why this link is useful"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Field
+            label="meta"
+            hint="optional"
+            value={metaValue}
+            onChange={(e) => updateMeta(e.target.value)}
+            placeholder="github · docs · case study"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (template === "timeline") {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field
+          label="title"
+          value={item.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="e.g. launched v2"
+        />
+        <Field
+          label="date / period"
+          value={item.date ?? metaValue}
+          onChange={(e) => onChange({ date: e.target.value, meta: e.target.value })}
+          placeholder="2024 · Jan-Mar"
+        />
+        <div className="sm:col-span-2">
+          <TextField
+            label="description"
+            hint="optional"
+            value={item.description ?? ""}
+            onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="what happened and why it mattered"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Field
+            label="link"
+            hint="optional"
+            value={item.link ?? ""}
+            onChange={(e) => onChange({ link: e.target.value })}
+            placeholder="https://..."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (template === "gallery") {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field
+          label="title"
+          value={item.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="e.g. brand refresh"
+        />
+        <Field
+          label="image url"
+          value={item.imageUrl ?? ""}
+          onChange={(e) => onChange({ imageUrl: e.target.value })}
+          placeholder="https://..."
+        />
+        <div className="sm:col-span-2">
+          <TextField
+            label="description"
+            hint="optional"
+            value={item.description ?? ""}
+            onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="caption or context"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Field
+            label="link"
+            hint="optional"
+            value={item.link ?? ""}
+            onChange={(e) => onChange({ link: e.target.value })}
+            placeholder="https://..."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (template === "stats") {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field
+          label="label"
+          value={item.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="e.g. users"
+        />
+        <Field
+          label="value"
+          value={item.value ?? ""}
+          onChange={(e) => onChange({ value: e.target.value })}
+          placeholder="10k+"
+        />
+        <Field
+          label="meta"
+          hint="optional"
+          value={metaValue}
+          onChange={(e) => updateMeta(e.target.value)}
+          placeholder="monthly active"
+        />
+        <Field
+          label="link"
+          hint="optional"
+          value={item.link ?? ""}
+          onChange={(e) => onChange({ link: e.target.value })}
+          placeholder="https://..."
+        />
+        <div className="sm:col-span-2">
+          <TextField
+            label="description"
+            hint="optional"
+            value={item.description ?? ""}
+            onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="extra context for the number"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <Field
+        label="title"
+        value={item.title}
+        onChange={(e) => onChange({ title: e.target.value })}
+        placeholder="e.g. AWS Solutions Architect"
+      />
+      <Field
+        label="meta"
+        hint="optional"
+        value={metaValue}
+        onChange={(e) => updateMeta(e.target.value)}
+        placeholder="e.g. Amazon Web Services · 2024"
+      />
+      <div className="sm:col-span-2">
+        <Field
+          label="link"
+          hint="optional"
+          value={item.link ?? ""}
+          onChange={(e) => onChange({ link: e.target.value })}
+          placeholder="https://..."
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <TextField
+          label="description"
+          hint="optional"
+          value={item.description ?? ""}
+          onChange={(e) => onChange({ description: e.target.value })}
+          placeholder="a short description of this item…"
+        />
       </div>
     </div>
   );

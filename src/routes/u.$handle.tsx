@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, TerminalSquare } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { loadPortfolioByHandle, type Portfolio } from "@/lib/portfolio";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
 
@@ -52,27 +52,59 @@ function PublicPortfolio() {
     throw notFound();
   }
 
+  const theme = portfolio.theme ?? "terminal";
+  const themedPageClass = theme === "terminal"
+    ? "bg-background"
+    : theme === "vercel"
+      ? "bg-white text-zinc-950"
+      : theme === "vercelDark"
+        ? "bg-[#050505] text-zinc-50"
+        : theme === "material"
+          ? "bg-[#fbf7ff] text-[#1f1b24]"
+          : theme === "editorial"
+            ? "bg-[#f8fafc] text-slate-950"
+            : "bg-[#111111] text-white";
+  const themedHeaderClass = theme === "terminal"
+    ? "border-border"
+    : theme === "vercel"
+      ? "border-zinc-200 bg-white/90"
+      : theme === "vercelDark"
+        ? "border-zinc-800 bg-[#050505]/90"
+        : theme === "material"
+          ? "border-[#e7dff5] bg-[#fbf7ff]/90"
+          : theme === "editorial"
+            ? "border-slate-300 bg-[#f8fafc]/90"
+            : "border-white/10 bg-[#111111]/90";
+  const themedLinkClass = theme === "terminal"
+    ? "hover:text-neon"
+    : theme === "vercelDark"
+      ? "hover:text-white"
+    : theme === "material"
+      ? "hover:text-[#6750a4]"
+      : theme === "studio"
+        ? "hover:text-sky-300"
+        : "hover:text-amber-700";
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 h-12 flex items-center justify-between">
+    <div className={`min-h-screen ${themedPageClass}`}>
+      <header className={`border-b backdrop-blur ${themedHeaderClass}`}>
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-12 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-mono font-bold text-sm">
-            <TerminalSquare className="h-4 w-4 text-neon" />
             <span>~/folio</span>
           </Link>
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-neon"
+            className={`inline-flex items-center gap-1 font-mono text-[11px] opacity-70 ${themedLinkClass}`}
           >
             <ArrowLeft className="h-3 w-3" /> edit
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
         <PortfolioRenderer portfolio={portfolio} framed={false} />
-        <p className="mt-6 text-center font-mono text-[11px] text-muted-foreground">
+        <p className="mt-6 text-center font-mono text-[11px] opacity-70">
           <span className="text-neon">●</span> built with{" "}
-          <Link to="/" className="hover:text-neon underline">folio</Link> · ship yours in 60s
+          <Link to="/" className={`${themedLinkClass} underline`}>folio</Link> · ship yours in 60s
         </p>
       </main>
     </div>

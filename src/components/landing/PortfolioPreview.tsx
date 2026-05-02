@@ -53,9 +53,10 @@ const MOCK_PORTFOLIO: Portfolio = {
     {
       id: "custom:stack",
       title: "tech stack",
+      template: "stats",
       items: [
-        { id: "i1", title: "frontend", subheading: "react · next.js · tailwind" },
-        { id: "i2", title: "backend", subheading: "node.js · go · postgres" },
+        { id: "i1", title: "frontend", value: "18", meta: "production launches", subheading: "production launches", description: "react · next.js · tailwind" },
+        { id: "i2", title: "backend", value: "9", meta: "core services", subheading: "core services", description: "node.js · go · postgres" },
       ],
     },
   ],

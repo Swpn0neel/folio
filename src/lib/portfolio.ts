@@ -10,19 +10,65 @@ export type BuiltInSectionId =
 // SectionId is widened to string to accommodate dynamic custom section IDs ("custom:<uid>")
 export type SectionId = BuiltInSectionId | string;
 
+export type CustomSectionTemplate = "simple" | "linkCards" | "timeline" | "gallery" | "stats";
+
+export const CUSTOM_SECTION_TEMPLATES: Array<{
+  id: CustomSectionTemplate;
+  label: string;
+  desc: string;
+}> = [
+  { id: "simple", label: "simple list", desc: "title, meta, description, link" },
+  { id: "linkCards", label: "link cards", desc: "featured links with context" },
+  { id: "timeline", label: "timeline", desc: "dated milestones and events" },
+  { id: "gallery", label: "gallery", desc: "image-led work or media" },
+  { id: "stats", label: "stats", desc: "numbers, labels, and notes" },
+];
+
+export function isCustomSectionTemplate(value: unknown): value is CustomSectionTemplate {
+  return CUSTOM_SECTION_TEMPLATES.some((template) => template.id === value);
+}
+
+export function getCustomSectionTemplateMeta(template: CustomSectionTemplate) {
+  return CUSTOM_SECTION_TEMPLATES.find((item) => item.id === template) ?? CUSTOM_SECTION_TEMPLATES[0];
+}
+
 export type CustomSectionItem = {
   id: string;
   title: string;
   subheading?: string;
+  meta?: string;
   link?: string;
   description?: string;
+  date?: string;
+  imageUrl?: string;
+  value?: string;
 };
 
 export type CustomSection = {
   id: string; // matches the SectionId "custom:<uid>"
   title: string; // user-defined section title
+  template: CustomSectionTemplate;
   items: CustomSectionItem[];
 };
+
+export type PortfolioThemeId = "terminal" | "vercel" | "vercelDark" | "material" | "editorial" | "studio";
+
+export const PORTFOLIO_THEMES: Array<{
+  id: PortfolioThemeId;
+  label: string;
+  desc: string;
+}> = [
+  { id: "terminal", label: "terminal developer", desc: "mono, sharp, command-line focused" },
+  { id: "vercel", label: "minimal vercel", desc: "clean, monochrome, product-builder feel" },
+  { id: "vercelDark", label: "vercel dark", desc: "same minimal system, tuned for dark mode" },
+  { id: "material", label: "material you", desc: "colorful cards with soft adaptive surfaces" },
+  { id: "editorial", label: "editorial resume", desc: "polished writing-first professional page" },
+  { id: "studio", label: "creative studio", desc: "bold portfolio grid with punchy accents" },
+];
+
+export function isPortfolioThemeId(value: unknown): value is PortfolioThemeId {
+  return PORTFOLIO_THEMES.some((theme) => theme.id === value);
+}
 
 export type Social = {
   id: string;
@@ -63,6 +109,7 @@ export type Achievement = {
 };
 
 export type Portfolio = {
+  theme: PortfolioThemeId;
   handle: string;
   showHandle: boolean;
   fullName: string;
@@ -108,16 +155,40 @@ export const SECTION_META: Record<BuiltInSectionId, { label: string; desc: strin
 export function getSectionMeta(id: SectionId, customSections: CustomSection[]): { label: string; desc: string; accent: string } {
   if (id in SECTION_META) return SECTION_META[id as BuiltInSectionId];
   const custom = customSections.find((s) => s.id === id);
+  const templateMeta = getCustomSectionTemplateMeta(custom?.template ?? "simple");
   return {
     label: custom?.title || "custom",
-    desc: `${custom?.items.length ?? 0} item${(custom?.items.length ?? 0) !== 1 ? "s" : ""} · custom section`,
+    desc: `${custom?.items.length ?? 0} item${(custom?.items.length ?? 0) !== 1 ? "s" : ""} · ${templateMeta.label}`,
     accent: "text-magenta",
   };
 }
 
 const STORAGE_KEY = "folio:portfolio";
 
+function normalizeCustomItem(item: Partial<CustomSectionItem>): CustomSectionItem {
+  const meta = item.meta ?? item.subheading ?? "";
+  return {
+    ...item,
+    id: item.id || uid(),
+    title: item.title ?? "",
+    subheading: item.subheading ?? meta,
+    meta,
+    link: item.link ?? "",
+    description: item.description ?? "",
+  };
+}
+
+function normalizeCustomSection(section: Partial<CustomSection>): CustomSection {
+  return {
+    id: section.id || `custom:${uid()}`,
+    title: section.title ?? "",
+    template: isCustomSectionTemplate(section.template) ? section.template : "simple",
+    items: (section.items ?? []).map(normalizeCustomItem),
+  };
+}
+
 export const defaultPortfolio = (): Portfolio => ({
+  theme: "terminal",
   handle: "you",
   showHandle: true,
   fullName: "Your Name",
@@ -171,7 +242,7 @@ export function loadPortfolio(): Portfolio {
       ];
     }
     // Merge defensively against schema drift
-    const customSections: CustomSection[] = parsed.customSections ?? [];
+    const customSections: CustomSection[] = (parsed.customSections ?? []).map(normalizeCustomSection);
     // Ensure any custom section IDs present in customSections are represented in order / enabled
     const customIds = customSections.map((s) => s.id);
     const mergedOrder = [
@@ -186,6 +257,7 @@ export function loadPortfolio(): Portfolio {
     return {
       ...base,
       ...parsed,
+      theme: isPortfolioThemeId(parsed.theme) ? parsed.theme : base.theme,
       handle: parsed.handle || base.handle, // Fallback to "you" if empty
       enabled: { ...base.enabled, ...(parsed.enabled ?? {}), ...customEnabled },
       sectionColors: parsed.sectionColors ?? {},

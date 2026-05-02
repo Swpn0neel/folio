@@ -6,7 +6,6 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
       <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-mono font-bold">
-          <TerminalSquare className="h-5 w-5 text-neon" />
           <span className="text-foreground">~/folio</span>
           <span className="text-neon animate-blink">_</span>
         </Link>

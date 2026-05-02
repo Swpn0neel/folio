@@ -18,7 +18,6 @@ export function AuthShell({
       <header className="border-b border-border">
         <div className="mx-auto max-w-6xl px-6 h-14 flex items-center">
           <Link to="/" className="flex items-center gap-2 font-mono font-bold">
-            <TerminalSquare className="h-5 w-5 text-neon" />
             <span>~/folio</span>
             <span className="text-neon animate-blink">_</span>
           </Link>
