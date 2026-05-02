@@ -10,7 +10,7 @@ export type BuiltInSectionId =
 // SectionId is widened to string to accommodate dynamic custom section IDs ("custom:<uid>")
 export type SectionId = BuiltInSectionId | string;
 
-export type CustomSectionTemplate = "simple" | "linkCards" | "timeline" | "gallery" | "stats";
+export type CustomSectionTemplate = "simple" | "linkCards" | "timeline" | "gallery" | "stats" | "textBox";
 
 export const CUSTOM_SECTION_TEMPLATES: Array<{
   id: CustomSectionTemplate;
@@ -22,6 +22,7 @@ export const CUSTOM_SECTION_TEMPLATES: Array<{
   { id: "timeline", label: "timeline", desc: "dated milestones and events" },
   { id: "gallery", label: "gallery", desc: "image-led work or media" },
   { id: "stats", label: "stats", desc: "numbers, labels, and notes" },
+  { id: "textBox", label: "text box", desc: "multi-line text block" },
 ];
 
 export function isCustomSectionTemplate(value: unknown): value is CustomSectionTemplate {
@@ -59,7 +60,7 @@ export const PORTFOLIO_THEMES: Array<{
   desc: string;
 }> = [
   { id: "terminal", label: "terminal developer", desc: "mono, sharp, command-line focused" },
-  { id: "vercel", label: "minimal vercel", desc: "clean, monochrome, product-builder feel" },
+  { id: "vercel", label: "vercel light", desc: "clean, monochrome, product-builder feel" },
   { id: "vercelDark", label: "vercel dark", desc: "same minimal system, tuned for dark mode" },
   { id: "material", label: "material you", desc: "colorful cards with soft adaptive surfaces" },
   { id: "editorial", label: "editorial resume", desc: "polished writing-first professional page" },
@@ -142,9 +143,9 @@ export const BUILT_IN_SECTIONS: BuiltInSectionId[] = [
 export const ALL_SECTIONS = BUILT_IN_SECTIONS;
 
 export const SECTION_META: Record<BuiltInSectionId, { label: string; desc: string; accent: string }> = {
-  profile: { label: "profile", desc: "name · avatar · tagline", accent: "text-neon" },
+  profile: { label: "profile", desc: "name · avatar · tag", accent: "text-neon" },
   bio: { label: "bio", desc: "about you · in your words", accent: "text-rose" },
-  socials: { label: "socials", desc: "github · x · linkedin · site", accent: "text-cyan" },
+  socials: { label: "socials", desc: "github · x · etc", accent: "text-cyan" },
   projects: { label: "projects", desc: "what you've built", accent: "text-neon" },
   blogs: { label: "blogs", desc: "what you've written", accent: "text-magenta" },
   experience: { label: "experience", desc: "where you've worked", accent: "text-indigo" },

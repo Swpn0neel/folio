@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Eye, EyeOff, GripVertical, Trash2 } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Lock, Trash2 } from "lucide-react";
 import { getSectionMeta, type CustomSection, type PortfolioThemeId, type SectionId } from "@/lib/portfolio";
 
 // ─── Colour palette ────────────────────────────────────────────────────────────
@@ -19,20 +19,20 @@ export const SECTION_COLOR_GROUPS: Record<PortfolioThemeId, SectionColor[]> = {
     { key: "rose", label: "rose", css: "var(--rose)" },
   ],
   vercel: [
-    { key: "graphite", label: "graphite", css: "oklch(0.22 0.02 255)" },
-    { key: "zinc", label: "zinc", css: "oklch(0.50 0.02 255)" },
-    { key: "vercelBlue", label: "blue", css: "oklch(0.56 0.19 255)" },
-    { key: "vercelGreen", label: "green", css: "oklch(0.58 0.14 155)" },
-    { key: "vercelViolet", label: "violet", css: "oklch(0.58 0.17 292)" },
-    { key: "vercelRed", label: "red", css: "oklch(0.58 0.18 25)" },
+    { key: "develop", label: "develop", css: "#171717" },
+    { key: "preview", label: "preview", css: "#de1d8d" },
+    { key: "ship", label: "ship", css: "#ff5b4f" },
+    { key: "console", label: "console", css: "#0070f3" },
+    { key: "purply", label: "purply", css: "#7928ca" },
+    { key: "pinky", label: "pinky", css: "#eb367f" },
   ],
   vercelDark: [
-    { key: "darkSilver", label: "silver", css: "oklch(0.84 0.03 255)" },
-    { key: "darkBlue", label: "blue", css: "oklch(0.72 0.16 245)" },
-    { key: "darkMint", label: "mint", css: "oklch(0.78 0.14 165)" },
-    { key: "darkViolet", label: "violet", css: "oklch(0.74 0.18 300)" },
-    { key: "darkAmber", label: "amber", css: "oklch(0.82 0.15 85)" },
-    { key: "darkRose", label: "rose", css: "oklch(0.72 0.19 20)" },
+    { key: "developDark", label: "develop", css: "#fafafa" },
+    { key: "preview", label: "preview", css: "#de1d8d" },
+    { key: "ship", label: "ship", css: "#ff5b4f" },
+    { key: "console", label: "console", css: "#0070f3" },
+    { key: "purply", label: "purply", css: "#7928ca" },
+    { key: "pinky", label: "pinky", css: "#eb367f" },
   ],
   material: [
     { key: "lavender", label: "lavender", css: "oklch(0.62 0.17 305)" },
@@ -137,13 +137,14 @@ export function SectionsManager({
         {order.map((id) => {
           const meta = getSectionMeta(id, customSections);
           const on = enabled[id];
+          const isProfile = id === "profile";
           return (
             <div
               key={id}
-              className="flex items-center gap-2 border border-transparent bg-background/50 px-2 py-2"
+              className={`flex items-center gap-2 border border-transparent bg-background/50 px-2 py-2 ${isProfile ? "opacity-60" : ""}`}
             >
-              <span className="text-muted-foreground/60">
-                <GripVertical className="h-4 w-4" />
+              <span className="text-muted-foreground/60 px-1">
+                {isProfile ? <Lock className="h-3 w-3" /> : <GripVertical className="h-4 w-4" />}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-sm">
@@ -152,12 +153,14 @@ export function SectionsManager({
                 <p className="text-xs font-mono text-muted-foreground truncate">{meta.desc}</p>
               </div>
               <span
-                className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border ${
-                  on ? "border-neon text-neon" : "border-border text-muted-foreground"
+                className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border transition-colors ${
+                  isProfile 
+                    ? "border-neon/30 text-neon/60 bg-neon/5" 
+                    : (on ? "border-neon text-neon" : "border-border text-muted-foreground")
                 }`}
               >
                 {on ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                {on ? "on" : "off"}
+                {isProfile ? "always on" : (on ? "on" : "off")}
               </span>
             </div>
           );
@@ -168,25 +171,63 @@ export function SectionsManager({
 
   return (
     <>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={order} strategy={verticalListSortingStrategy}>
-          <div className="space-y-1 mb-2">
-            {order.map((id) => (
-              <SortableRow
-                key={id}
-                id={id}
-                on={enabled[id]}
-                color={sectionColors[id] ?? "default"}
-                theme={theme}
-                customSections={customSections}
-                onToggle={() => onToggle(id)}
-                onColorChange={(c) => onColorChange(id, c)}
-                onRemove={id.startsWith("custom:") && onRemoveCustom ? () => onRemoveCustom(id) : undefined}
-              />
-            ))}
+      <div className="space-y-1 mb-2">
+        {/* Profile section is always locked at the top */}
+        {order.includes("profile") && (
+          <div className="flex items-center gap-2 border border-border/40 bg-secondary/10 px-2 py-2 opacity-80">
+            <span className="text-muted-foreground/40 px-1" title="profile is locked at the top">
+              <Lock className="h-3 w-3" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="font-mono text-sm">
+                <span className="text-neon">$</span> {getSectionMeta("profile", customSections).label}
+              </p>
+              <p className="text-xs font-mono text-muted-foreground truncate">
+                {getSectionMeta("profile", customSections).desc}
+              </p>
+            </div>
+            <ColorPicker
+              value={sectionColors["profile"] ?? "default"}
+              defaultCss="var(--color-neon)"
+              theme={theme}
+              onChange={(c) => onColorChange("profile", c)}
+            />
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border border-neon/30 text-neon/60 bg-neon/5 cursor-default select-none">
+              <Eye className="h-3 w-3" />
+              always on
+            </span>
           </div>
-        </SortableContext>
-      </DndContext>
+        )}
+
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext
+            items={order.filter((id) => id !== "profile")}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-1">
+              {order
+                .filter((id) => id !== "profile")
+                .map((id) => (
+                  <SortableRow
+                    key={id}
+                    id={id}
+                    on={enabled[id]}
+                    color={sectionColors[id] ?? "default"}
+                    theme={theme}
+                    customSections={customSections}
+                    onToggle={() => onToggle(id)}
+                    onColorChange={(c) => onColorChange(id, c)}
+                    onRemove={
+                      id.startsWith("custom:") && onRemoveCustom
+                        ? () => onRemoveCustom(id)
+                        : undefined
+                    }
+                  />
+                ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
 
       {/* Add custom section inline form */}
       <div className="mt-3 border-t border-dashed border-border pt-3">
@@ -269,7 +310,7 @@ function ColorPicker({
         type="button"
         title="choose section colour"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 px-1.5 py-1 border border-border hover:border-foreground transition-colors"
+        className="flex items-center gap-1 px-2 h-[22px] border border-border hover:border-foreground transition-colors"
         aria-label="choose section colour"
       >
         {/* coloured circle swatch — shows current or section default */}
@@ -369,7 +410,7 @@ function SortableRow({
       <button
         type="button"
         onClick={onToggle}
-        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border transition-colors ${
+        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border transition-colors ${
           on ? "border-neon text-neon" : "border-border text-muted-foreground hover:border-foreground"
         }`}
       >

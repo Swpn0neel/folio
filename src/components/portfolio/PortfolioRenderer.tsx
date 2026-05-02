@@ -1,4 +1,4 @@
-import { Github, Twitter, Linkedin, Globe, ExternalLink, Award, Briefcase, BookOpen, FolderGit2, Link2, Mail, Fingerprint, LayoutTemplate } from "lucide-react";
+import { Github, Linkedin, Globe, ExternalLink, Award, Briefcase, BookOpen, FolderGit2, Link2, Mail, Fingerprint, LayoutTemplate, Instagram, Youtube, Twitch, Slack, Facebook, Dribbble, Figma, Codepen } from "lucide-react";
 import type { CustomSection, CustomSectionItem, Portfolio, PortfolioThemeId, SectionId } from "@/lib/portfolio";
 
 /** Maps a sectionColor key to its CSS variable string */
@@ -9,18 +9,13 @@ const COLOR_KEY_TO_CSS: Record<string, string> = {
   amber:   "var(--amber)",
   indigo:  "var(--indigo)",
   rose:    "var(--rose)",
-  graphite: "oklch(0.22 0.02 255)",
-  zinc: "oklch(0.50 0.02 255)",
-  vercelBlue: "oklch(0.56 0.19 255)",
-  vercelGreen: "oklch(0.58 0.14 155)",
-  vercelViolet: "oklch(0.58 0.17 292)",
-  vercelRed: "oklch(0.58 0.18 25)",
-  darkSilver: "oklch(0.84 0.03 255)",
-  darkBlue: "oklch(0.72 0.16 245)",
-  darkMint: "oklch(0.78 0.14 165)",
-  darkViolet: "oklch(0.74 0.18 300)",
-  darkAmber: "oklch(0.82 0.15 85)",
-  darkRose: "oklch(0.72 0.19 20)",
+  develop: "#171717",
+  developDark: "#fafafa",
+  preview: "#de1d8d",
+  ship: "#ff5b4f",
+  console: "#0070f3",
+  purply: "#7928ca",
+  pinky: "#eb367f",
   lavender: "oklch(0.62 0.17 305)",
   blossom: "oklch(0.74 0.16 350)",
   seafoam: "oklch(0.78 0.13 170)",
@@ -71,13 +66,34 @@ function resolveAccent(id: string, sectionColors: Record<string, string>): strin
   return DEFAULT_ACCENT_CSS[id] ?? "var(--color-neon)";
 }
 
+const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24h-2.195Z" />
+  </svg>
+);
+
+const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037 19.736 19.736 0 0 0-4.885 1.515.069.069 0 0 0-.032.027C.533 9.048-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.23 10.23 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.419-2.157 2.419z" />
+  </svg>
+);
+
 const socialIcon = (label: string) => {
   const l = label.toLowerCase();
   if (l.includes("github")) return Github;
-  if (l.includes("twitter") || l === "x") return Twitter;
+  if (l.includes("twitter") || l === "x" || l.includes("x.com")) return XIcon;
   if (l.includes("linkedin")) return Linkedin;
-  if (l.includes("mail") || l.includes("email")) return Mail;
-  if (l.includes("site") || l.includes("web") || l.includes("blog")) return Globe;
+  if (l.includes("instagram") || l.includes("ig")) return Instagram;
+  if (l.includes("youtube") || l.includes("yt")) return Youtube;
+  if (l.includes("twitch")) return Twitch;
+  if (l.includes("discord")) return DiscordIcon;
+  if (l.includes("slack")) return Slack;
+  if (l.includes("facebook") || l.includes("fb")) return Facebook;
+  if (l.includes("dribbble")) return Dribbble;
+  if (l.includes("figma")) return Figma;
+  if (l.includes("codepen")) return Codepen;
+  if (l.includes("mail") || l.includes("email") || l.includes("contact")) return Mail;
+  if (l.includes("site") || l.includes("web") || l.includes("blog") || l.includes("portfolio")) return Globe;
   return Link2;
 };
 
@@ -100,7 +116,7 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
     case "bio":
       return portfolio.bio ? (
         <Block icon={Fingerprint} label="about" accentCss={accentCss}>
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
+          <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
             {portfolio.bio}
           </p>
         </Block>
@@ -184,14 +200,14 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
     .map((id) => <Section key={id} id={id} portfolio={portfolio} />);
 
   const inner = (
-    <div className="p-6 md:p-10">
+    <>
       {profile}
       {rest.length > 0 && (
         <div className={`${profileFirst ? "mt-10" : ""} grid grid-cols-1 gap-px bg-border border border-border`}>
           {rest}
         </div>
       )}
-    </div>
+    </>
   );
 
   if (!framed) return inner;
@@ -209,7 +225,9 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
       </div>
     </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        {inner}
+        <div className="p-6 md:p-10">
+          {inner}
+        </div>
       </div>
     </div>
   );
@@ -264,6 +282,18 @@ function CustomSectionItems({
     );
   }
 
+  if (template === "textBox") {
+    return (
+      <div className="flex flex-col gap-4">
+        {section.items.map((item) => (
+          <p key={item.id} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
+            {item.description}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
       {section.items.map((item) => (
@@ -306,48 +336,48 @@ type ThemeView = {
 const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   vercel: {
     id: "vercel",
-    shell: "bg-white text-zinc-950",
-    frame: "border border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.10)]",
-    frameBar: "border-b border-zinc-200 bg-zinc-50 text-zinc-500",
+    shell: "bg-white text-[#171717]",
+    frame: "border border-[#ebebeb] bg-white shadow-[rgba(0,0,0,0.08)_0px_0px_0px_1px,rgba(0,0,0,0.04)_0px_2px_2px]",
+    frameBar: "border-b border-[#ebebeb] bg-[#fafafa] text-[#666666]",
     page: "bg-white px-6 py-7 md:px-10 md:py-10",
-    header: "flex flex-col gap-5 pb-8 sm:flex-row sm:items-center",
-    avatar: "rounded-full border border-zinc-200 shadow-sm",
-    title: "font-sans text-3xl md:text-5xl font-semibold tracking-normal text-zinc-950",
-    eyebrow: "text-xs font-medium uppercase tracking-widest text-zinc-500",
-    muted: "text-zinc-600",
-    sectionGrid: "mt-8 grid grid-cols-1 gap-6",
-    section: "border-b border-zinc-200 pb-6 last:border-b-0",
-    sectionTitle: "font-sans text-sm font-semibold uppercase tracking-widest text-zinc-950",
-    item: "rounded-md border border-zinc-200 bg-white p-4 transition-colors hover:bg-zinc-50",
+    header: "flex flex-col gap-8 pb-8 sm:flex-row sm:items-center",
+    avatar: "rounded-full border border-[#ebebeb] shadow-sm",
+    title: "font-sans text-3xl md:text-5xl font-bold tracking-tight text-[#171717]",
+    eyebrow: "text-sm font-medium uppercase tracking-widest text-[#666666]",
+    muted: "text-[#4d4d4d]",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
+    section: "border-b border-[#ebebeb] pb-6 last:border-b-0",
+    sectionTitle: "font-sans text-base font-semibold uppercase tracking-widest text-[#171717]",
+    item: "rounded-md border border-[#ebebeb] bg-white p-4 transition-colors hover:bg-[#fafafa]",
     simpleItem: "border-l-2 py-1 pl-4",
     timelineItem: "relative border-l-2 py-1 pl-5",
-    link: "text-zinc-950 hover:text-black",
-    badge: "rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs text-zinc-700",
-    customCard: "rounded-md border border-zinc-200 bg-zinc-50 p-4",
-    galleryImage: "rounded-md",
-    accent: "#050505",
+    link: "text-[#0072f5] hover:text-[#0068d6] underline underline-offset-4 decoration-[#0072f5]/30 hover:decoration-[#0072f5]",
+    badge: "rounded-full bg-[#ebf5ff] px-3 py-1 text-sm font-medium text-[#0068d6]",
+    customCard: "rounded-md border border-[#ebebeb] bg-[#fafafa] p-4",
+    galleryImage: "rounded-md border border-[#ebebeb]",
+    accent: "#0070f3",
   },
   vercelDark: {
     id: "vercelDark",
-    shell: "bg-[#050505] text-zinc-50",
-    frame: "border border-zinc-800 bg-[#050505] shadow-[0_24px_70px_rgba(0,0,0,0.45)]",
-    frameBar: "border-b border-zinc-800 bg-[#0a0a0a] text-zinc-500",
-    page: "bg-[#050505] px-6 py-7 md:px-10 md:py-10",
-    header: "flex flex-col gap-5 pb-8 sm:flex-row sm:items-center",
-    avatar: "rounded-full border border-zinc-800 shadow-sm",
-    title: "font-sans text-3xl md:text-5xl font-semibold tracking-normal text-zinc-50",
-    eyebrow: "text-xs font-medium uppercase tracking-widest text-zinc-500",
-    muted: "text-zinc-400",
-    sectionGrid: "mt-8 grid grid-cols-1 gap-6",
-    section: "border-b border-zinc-800 pb-6 last:border-b-0",
-    sectionTitle: "font-sans text-sm font-semibold uppercase tracking-widest text-zinc-50",
-    item: "rounded-md border border-zinc-800 bg-[#090909] p-4 transition-colors hover:bg-zinc-900",
+    shell: "bg-[#000000] text-[#fafafa]",
+    frame: "border border-[#171717] bg-[#000000] shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
+    frameBar: "border-b border-[#171717] bg-[#0a0a0a] text-[#808080]",
+    page: "bg-[#000000] px-6 py-7 md:px-10 md:py-10",
+    header: "flex flex-col gap-8 pb-8 sm:flex-row sm:items-center",
+    avatar: "rounded-full border border-[#171717] shadow-sm",
+    title: "font-sans text-3xl md:text-5xl font-bold tracking-tight text-[#ffffff]",
+    eyebrow: "text-sm font-medium uppercase tracking-widest text-[#808080]",
+    muted: "text-[#808080]",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
+    section: "border-b border-[#171717] pb-6 last:border-b-0",
+    sectionTitle: "font-sans text-base font-semibold uppercase tracking-widest text-[#ffffff]",
+    item: "rounded-md border border-[#171717] bg-[#0a0a0a] p-4 transition-colors hover:bg-[#171717]",
     simpleItem: "border-l-2 py-1 pl-4",
     timelineItem: "relative border-l-2 py-1 pl-5",
-    link: "text-zinc-50 hover:text-white",
-    badge: "rounded-full border border-zinc-800 bg-zinc-950 px-3 py-1 text-xs text-zinc-300",
-    customCard: "rounded-md border border-zinc-800 bg-[#090909] p-4",
-    galleryImage: "rounded-md",
+    link: "text-[#0072f5] hover:text-[#0068d6] underline underline-offset-4 decoration-[#0072f5]/30 hover:decoration-[#0072f5]",
+    badge: "rounded-full border border-[#171717] bg-[#0a0a0a] px-3 py-1 text-sm text-[#fafafa]",
+    customCard: "rounded-md border border-[#171717] bg-[#0a0a0a] p-4",
+    galleryImage: "rounded-md border border-[#171717]",
     accent: "#fafafa",
   },
   material: {
@@ -356,19 +386,19 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
     frame: "rounded-[28px] border border-[#e7dff5] bg-[#fbf7ff] shadow-[0_24px_70px_rgba(103,80,164,0.18)] overflow-hidden",
     frameBar: "border-b border-[#e7dff5] bg-[#f1e8ff] text-[#625b71]",
     page: "bg-[linear-gradient(135deg,#fbf7ff_0%,#fff7ed_48%,#effdf7_100%)] px-6 py-7 md:px-10 md:py-10",
-    header: "flex flex-col gap-5 sm:flex-row sm:items-center",
+    header: "flex flex-col gap-8 sm:flex-row sm:items-center",
     avatar: "rounded-[24px] shadow-[0_10px_28px_rgba(103,80,164,0.22)]",
     title: "font-sans text-3xl md:text-5xl font-bold tracking-normal text-[#1f1b24]",
-    eyebrow: "text-xs font-bold uppercase tracking-widest text-[#6750a4]",
+    eyebrow: "text-sm font-bold uppercase tracking-widest text-[#6750a4]",
     muted: "text-[#625b71]",
-    sectionGrid: "mt-7 grid grid-cols-1 gap-4",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
     section: "rounded-[24px] bg-white/76 p-5 shadow-[0_10px_30px_rgba(103,80,164,0.10)]",
-    sectionTitle: "font-sans text-sm font-bold uppercase tracking-widest text-[#6750a4]",
+    sectionTitle: "font-sans text-base font-bold uppercase tracking-widest text-[#6750a4]",
     item: "rounded-[18px] border border-[#e7dff5] bg-[#fffbff] p-4 transition-transform hover:-translate-y-0.5",
     simpleItem: "rounded-[18px] bg-white/55 px-4 py-3",
     timelineItem: "relative border-l-2 py-1 pl-5",
     link: "text-[#6750a4] hover:text-[#4f378b]",
-    badge: "rounded-full bg-[#eaddff] px-3 py-1 text-xs font-semibold text-[#21005d]",
+    badge: "rounded-full bg-[#eaddff] px-3 py-1 text-sm font-semibold text-[#21005d]",
     customCard: "rounded-[18px] bg-[#fef7ff] p-4",
     galleryImage: "rounded-[16px]",
     accent: "#6750a4",
@@ -379,19 +409,19 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
     frame: "border border-slate-300 bg-[#f8fafc] shadow-[0_28px_80px_rgba(15,23,42,0.12)]",
     frameBar: "border-b border-slate-300 bg-[#f1f5f9] text-slate-500",
     page: "bg-[#f8fafc] px-6 py-8 md:px-12 md:py-12",
-    header: "flex flex-col gap-5 border-b-2 border-slate-950 pb-8 sm:flex-row sm:items-center",
+    header: "flex flex-col gap-8 border-b-2 border-slate-950 pb-8 sm:flex-row sm:items-center",
     avatar: "rounded-sm border border-slate-300 grayscale",
-    title: "font-sans text-4xl md:text-6xl font-semibold tracking-normal leading-tight text-slate-950",
-    eyebrow: "text-xs font-bold uppercase tracking-widest text-amber-700",
+    title: "font-sans text-4xl md:text-6xl font-bold tracking-normal leading-tight text-slate-950",
+    eyebrow: "text-sm font-bold uppercase tracking-widest text-amber-700",
     muted: "text-slate-600",
-    sectionGrid: "mt-9 grid grid-cols-1 gap-8",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
     section: "grid gap-4 md:grid-cols-[160px_minmax(0,1fr)]",
-    sectionTitle: "font-sans text-xs font-bold uppercase tracking-widest text-slate-950",
+    sectionTitle: "font-sans text-sm font-bold uppercase tracking-widest text-slate-950",
     item: "border-t border-slate-300 py-4 first:border-t-0 first:pt-0",
     simpleItem: "border-l-2 py-1 pl-4",
     timelineItem: "relative border-l-2 py-1 pl-5",
     link: "text-slate-950 underline decoration-amber-600/60 underline-offset-4 hover:decoration-amber-600",
-    badge: "border border-slate-300 bg-white px-3 py-1 text-xs text-slate-700",
+    badge: "border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700",
     customCard: "border-t border-slate-300 py-4",
     galleryImage: "rounded-sm",
     accent: "#b45309",
@@ -402,19 +432,19 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
     frame: "border border-white/10 bg-[#111111] shadow-[0_28px_90px_rgba(244,63,94,0.18)]",
     frameBar: "border-b border-white/10 bg-[#18181b] text-zinc-400",
     page: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.28),transparent_34%),linear-gradient(135deg,#111111,#171717_55%,#0f172a)] px-6 py-7 md:px-10 md:py-10",
-    header: "flex flex-col gap-5 sm:flex-row sm:items-center",
+    header: "flex flex-col gap-8 sm:flex-row sm:items-center",
     avatar: "rounded-2xl border border-white/15 shadow-[10px_10px_0_#f43f5e]",
     title: "font-sans text-4xl md:text-6xl font-black tracking-normal leading-none text-white",
-    eyebrow: "text-xs font-bold uppercase tracking-widest text-sky-300",
+    eyebrow: "text-sm font-bold uppercase tracking-widest text-sky-300",
     muted: "text-zinc-300",
-    sectionGrid: "mt-7 grid grid-cols-1 gap-4 md:grid-cols-2",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8 md:grid-cols-2",
     section: "border border-white/10 bg-white/[0.06] p-5 backdrop-blur",
-    sectionTitle: "font-sans text-sm font-black uppercase tracking-widest text-white",
+    sectionTitle: "font-sans text-base font-black uppercase tracking-widest text-white",
     item: "border border-white/10 bg-black/20 p-4 transition-colors hover:border-rose-400/70",
     simpleItem: "border-l-2 py-1 pl-4",
     timelineItem: "relative border-l-2 py-1 pl-5",
     link: "text-sky-300 hover:text-rose-300",
-    badge: "border border-white/10 bg-white/10 px-3 py-1 text-xs text-zinc-100",
+    badge: "border border-white/10 bg-white/10 px-3 py-1 text-sm text-zinc-100",
     customCard: "border border-white/10 bg-black/20 p-4",
     galleryImage: "rounded-xl",
     accent: "#f43f5e",
@@ -484,7 +514,7 @@ function ThemedProfile({ p, view, accentCss }: { p: Portfolio; view: ThemeView; 
       <div className="min-w-0">
         {showHandle && <p className={view.eyebrow} style={{ color: accentCss }}>@{p.handle || "you"}</p>}
         <h1 className={`${view.title} mt-3 break-words`}>{p.fullName || "Your Name"}<span style={{ color: accentCss }}>.</span></h1>
-        {p.tagline && <p className={`${view.muted} mt-4 max-w-2xl text-base leading-relaxed`}>{p.tagline}</p>}
+        {p.tagline && <p className={`${view.muted} mt-4 max-w-2xl text-base md:text-lg leading-relaxed`}>{p.tagline}</p>}
       </div>
     </section>
   );
@@ -504,7 +534,7 @@ function ThemedAvatar({ p, view, accentCss }: { p: Portfolio; view: ThemeView; a
 
   return (
     <div
-      className={`${view.avatar} flex h-24 w-24 items-center justify-center text-2xl font-bold md:h-32 md:w-32`}
+      className={`${view.avatar} flex h-24 w-24 items-center justify-center text-3xl font-bold md:h-32 md:w-32`}
       style={{
         color: accentCss,
         borderColor: accentCss,
@@ -556,7 +586,7 @@ function renderThemedSectionContent(
   custom?: CustomSection,
 ) {
   if (id === "bio") {
-    return portfolio.bio ? <p className={`${view.muted} text-sm leading-relaxed whitespace-pre-line`}>{portfolio.bio}</p> : null;
+    return portfolio.bio ? <p className={`${view.muted} text-base leading-relaxed whitespace-pre-line`}>{portfolio.bio}</p> : null;
   }
   if (id === "socials") {
     if (!portfolio.socials?.length) return null;
@@ -565,8 +595,19 @@ function renderThemedSectionContent(
         {portfolio.socials.map((social) => {
           const Icon = socialIcon(social.label);
           return (
-            <a key={social.id} href={social.url || "#"} target="_blank" rel="noreferrer noopener" className={`${view.badge} inline-flex items-center gap-2`} style={{ borderColor: accentCss }}>
-              <Icon className="h-3.5 w-3.5" />
+            <a
+              key={social.id}
+              href={social.url || "#"}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={`${view.badge} inline-flex items-center gap-2 transition-colors`}
+              style={{
+                backgroundColor: view.id === "material" ? `color-mix(in oklch, ${accentCss}, transparent 85%)` : undefined,
+                color: view.id === "material" ? `color-mix(in oklch, ${accentCss}, black 40%)` : undefined,
+                borderColor: view.id === "material" ? `color-mix(in oklch, ${accentCss}, transparent 70%)` : accentCss,
+              }}
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0" />
               {social.label || "link"}
             </a>
           );
@@ -633,8 +674,9 @@ function ThemedCustomItems({
   const template = section.template ?? "simple";
 
   if (template === "linkCards") {
+    const isEditorial = view.id === "editorial";
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className={`grid grid-cols-1 gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
         ))}
@@ -643,10 +685,23 @@ function ThemedCustomItems({
   }
 
   if (template === "gallery" || template === "stats") {
+    const isEditorial = view.id === "editorial";
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className={`grid grid-cols-1 gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
+        ))}
+      </div>
+    );
+  }
+
+  if (template === "textBox") {
+    return (
+      <div className="flex flex-col gap-4">
+        {section.items.map((item) => (
+          <p key={item.id} className={`${view.muted} text-base leading-relaxed whitespace-pre-line`}>
+            {item.description}
+          </p>
         ))}
       </div>
     );
@@ -675,11 +730,11 @@ function ThemedCustomItem({
   if (template === "stats") {
     return (
       <a href={item.link || undefined} target={item.link ? "_blank" : undefined} rel={item.link ? "noreferrer noopener" : undefined} className={view.customCard} style={{ borderColor: accentCss }}>
-        <p className="text-3xl font-bold" style={{ color: accentCss }}>{item.value || "0"}</p>
-        <p className="mt-1 font-semibold">{item.title || "metric"}</p>
-        {(item.meta ?? item.subheading) && <p className={`${view.muted} mt-1 text-xs`}>{item.meta ?? item.subheading}</p>}
-        {item.description && <p className={`${view.muted} mt-2 text-sm leading-relaxed whitespace-pre-line`}>{item.description}</p>}
-        {item.link && <p className="mt-3 truncate text-xs" style={{ color: accentCss }}>{item.link}</p>}
+        <p className="text-4xl font-bold" style={{ color: accentCss }}>{item.value || "0"}</p>
+        <p className="mt-1 font-semibold text-base">{item.title || "metric"}</p>
+        {(item.meta ?? item.subheading) && <p className={`${view.muted} mt-1 text-sm`}>{item.meta ?? item.subheading}</p>}
+        {item.description && <p className={`${view.muted} mt-2 text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
+        {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
       </a>
     );
   }
@@ -688,9 +743,9 @@ function ThemedCustomItem({
     return (
       <a href={item.link || undefined} target={item.link ? "_blank" : undefined} rel={item.link ? "noreferrer noopener" : undefined} className={`${view.customCard} block overflow-hidden`} style={{ borderColor: accentCss }}>
         {item.imageUrl && <img src={item.imageUrl} alt={item.title || "gallery item"} className={`${view.galleryImage} mb-3 aspect-video w-full object-cover`} />}
-        <p className="break-words text-sm font-semibold">{item.title || "untitled"}</p>
-        {item.description && <p className={`${view.muted} mt-2 break-words text-sm leading-relaxed whitespace-pre-line`}>{item.description}</p>}
-        {item.link && <p className="mt-3 truncate text-xs" style={{ color: accentCss }}>{item.link}</p>}
+        <p className="break-words text-base font-semibold">{item.title || "untitled"}</p>
+        {item.description && <p className={`${view.muted} mt-2 break-words text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
+        {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
       </a>
     );
   }
@@ -698,7 +753,7 @@ function ThemedCustomItem({
   if (template === "timeline") {
     return (
       <div className={view.timelineItem} style={{ borderColor: accentCss }}>
-        <span className="absolute -left-[5px] top-2 h-2.5 w-2.5 rounded-full border-2 bg-current" style={{ color: accentCss, borderColor: accentCss }} />
+        <span className="absolute -left-[6px] top-2 h-2.5 w-2.5 rounded-full border-2 bg-current" style={{ color: accentCss, borderColor: accentCss }} />
         <ThemedItem view={view} accentCss={accentCss} title={item.title || "untitled"} meta={item.date || item.meta || item.subheading} desc={item.description} url={item.link} bare />
       </div>
     );
@@ -740,13 +795,16 @@ function ThemedItem({
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="break-words text-sm font-semibold">{title}</p>
-          {meta && <p className={`${view.muted} mt-1 text-xs`}>{meta}</p>}
+          <p className="break-words text-base font-semibold">{title}</p>
+          {meta && <p className={`${view.muted} mt-1 text-sm`}>{meta}</p>}
         </div>
-        {url && <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 opacity-70" style={{ color: accentCss }} />}
+        {url && (() => {
+          const Icon = socialIcon(title);
+          return <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-70" style={{ color: accentCss }} />;
+        })()}
       </div>
-      {desc && <p className={`${view.muted} mt-2 break-words text-sm leading-relaxed whitespace-pre-line`}>{desc}</p>}
-      {url && <p className="mt-3 truncate text-xs" style={{ color: accentCss }}>{url}</p>}
+      {desc && <p className={`${view.muted} mt-2 break-words text-base leading-relaxed whitespace-pre-line`}>{desc}</p>}
+      {url && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{url}</p>}
     </>
   );
 
@@ -787,15 +845,18 @@ function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: s
     <Wrapper>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-sm font-bold break-words">{item.title || "untitled link"}</p>
+          <p className="font-mono text-base font-bold break-words">{item.title || "untitled link"}</p>
           {(item.meta ?? item.subheading) && (
-            <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
+            <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
           )}
         </div>
-        {item.link && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
+        {item.link && (() => {
+          const Icon = socialIcon(item.title || item.meta || "");
+          return <Icon className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />;
+        })()}
       </div>
-      {item.description && <p className="text-xs text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
-      {item.link && <p className="font-mono text-[10px] mt-3 truncate" style={{ color: accentCss }}>{item.link}</p>}
+      {item.description && <p className="text-sm text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
+      {item.link && <p className="font-mono text-sm mt-3 truncate" style={{ color: accentCss }}>{item.link}</p>}
     </Wrapper>
   );
 }
@@ -803,7 +864,7 @@ function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: s
 function TimelineItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   return (
     <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
-      <p className="font-mono text-[11px] text-muted-foreground pt-0.5 break-words">
+      <p className="font-mono text-xs text-muted-foreground pt-0.5 break-words">
         {item.date || item.meta || item.subheading || "now"}
       </p>
       <div className="relative min-w-0 border-l border-border pl-4">
@@ -846,14 +907,14 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
 function StatItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   const content = (
     <div className="group border border-border bg-background p-4 hover:bg-secondary/50 transition-colors">
-      <p className="font-mono text-2xl font-bold break-words" style={{ color: accentCss }}>
+      <p className="font-mono text-4xl font-bold break-words" style={{ color: accentCss }}>
         {item.value || "0"}
       </p>
-      <p className="font-mono text-sm font-medium mt-1 break-words">{item.title || "metric"}</p>
+      <p className="font-mono text-base font-medium mt-1 break-words">{item.title || "metric"}</p>
       {(item.meta ?? item.subheading) && (
-        <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
+        <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
       )}
-      {item.description && <p className="text-xs text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
+      {item.description && <p className="text-sm text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
     </div>
   );
 
@@ -870,7 +931,7 @@ function ProfileBlock({ p, accentCss }: { p: Portfolio; accentCss?: string }) {
   const showHandle = p.showHandle ?? true;
   const accent = accentCss ?? "var(--neon)";
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-8">
       {p.avatarUrl ? (
         <img
           src={p.avatarUrl}
@@ -892,7 +953,7 @@ function ProfileBlock({ p, accentCss }: { p: Portfolio; accentCss?: string }) {
           <span className="animate-blink" style={{ color: accent }}>_</span>
         </h3>
         {(showHandle || p.tagline) && (
-          <p className="font-mono text-xs mt-1 break-words" style={{ color: accent }}>
+          <p className="font-mono text-sm mt-1 break-words" style={{ color: accent }}>
             {showHandle && <span>@{p.handle || "you"}</span>}
             {showHandle && p.tagline && <span> · </span>}
             {p.tagline && <span>{p.tagline}</span>}
@@ -923,7 +984,7 @@ function SocialsBlock({ p, accentCss }: { p: Portfolio; accentCss?: string }) {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
             >
               <Icon className="h-4 w-4 text-muted-foreground shrink-0" style={{ color: undefined }} />
-              <span className="font-mono text-xs font-medium whitespace-nowrap">{s.label || "link"}</span>
+              <span className="font-mono text-sm font-medium whitespace-nowrap">{s.label || "link"}</span>
             </a>
           );
         })}
@@ -951,7 +1012,7 @@ function Block({
           <Icon className="h-4 w-4" />
         </span>
         <span
-          className="font-mono text-xs font-bold uppercase tracking-widest"
+          className="font-mono text-sm font-bold uppercase tracking-widest"
           style={{ color: accentCss }}
         >
           {">"}  {label}
@@ -978,9 +1039,9 @@ function Item({ title, meta, desc, url }: { title: string; meta?: string; desc?:
   return (
     <Wrapper>
       <div className="min-w-0">
-        <p className="font-mono text-sm font-medium break-words">{title}</p>
-        {meta && <p className="text-xs font-mono text-muted-foreground mt-0.5">{meta}</p>}
-        {desc && <p className="text-xs text-muted-foreground mt-1 break-words whitespace-pre-line">{desc}</p>}
+        <p className="font-mono text-base font-medium break-words">{title}</p>
+        {meta && <p className="text-sm font-mono text-muted-foreground mt-0.5">{meta}</p>}
+        {desc && <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-line">{desc}</p>}
       </div>
       {url && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
     </Wrapper>

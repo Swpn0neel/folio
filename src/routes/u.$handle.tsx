@@ -58,7 +58,7 @@ function PublicPortfolio() {
     : theme === "vercel"
       ? "bg-white text-zinc-950"
       : theme === "vercelDark"
-        ? "bg-[#050505] text-zinc-50"
+        ? "bg-[#000000] text-zinc-50"
         : theme === "material"
           ? "bg-[#fbf7ff] text-[#1f1b24]"
           : theme === "editorial"
@@ -69,7 +69,7 @@ function PublicPortfolio() {
     : theme === "vercel"
       ? "border-zinc-200 bg-white/90"
       : theme === "vercelDark"
-        ? "border-zinc-800 bg-[#050505]/90"
+        ? "border-zinc-800 bg-[#000000]/90"
         : theme === "material"
           ? "border-[#e7dff5] bg-[#fbf7ff]/90"
           : theme === "editorial"
@@ -94,7 +94,7 @@ function PublicPortfolio() {
           </Link>
           <Link
             to="/dashboard"
-            className={`inline-flex items-center gap-1 font-mono text-[11px] opacity-70 ${themedLinkClass}`}
+            className={`inline-flex items-center gap-1 font-mono text-xs opacity-70 ${themedLinkClass}`}
           >
             <ArrowLeft className="h-3 w-3" /> edit
           </Link>
@@ -102,7 +102,7 @@ function PublicPortfolio() {
       </header>
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
         <PortfolioRenderer portfolio={portfolio} framed={false} />
-        <p className="mt-6 text-center font-mono text-[11px] opacity-70">
+        <p className="mt-6 text-center font-mono text-xs opacity-70">
           <span className="text-neon">●</span> built with{" "}
           <Link to="/" className={`${themedLinkClass} underline`}>folio</Link> · ship yours in 60s
         </p>

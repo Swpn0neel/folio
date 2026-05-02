@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2, Palette } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2, Palette, ChevronDown } from "lucide-react";
 import {
   defaultPortfolio,
   loadPortfolio,
@@ -49,7 +49,13 @@ function Dashboard() {
 
   // hydrate from localStorage on mount
   useEffect(() => {
-    setPortfolio(loadPortfolio());
+    const loaded = loadPortfolio();
+    // Enforce profile at top and enabled
+    loaded.enabled.profile = true;
+    if (loaded.order[0] !== "profile") {
+      loaded.order = ["profile", ...loaded.order.filter((id) => id !== "profile")];
+    }
+    setPortfolio(loaded);
     setHydrated(true);
   }, []);
 
@@ -66,11 +72,18 @@ function Dashboard() {
   const update = <K extends keyof Portfolio>(key: K, value: Portfolio[K]) =>
     setPortfolio((p) => ({ ...p, [key]: value }));
 
-  const toggleSection = (id: SectionId) =>
+  const toggleSection = (id: SectionId) => {
+    if (id === "profile") return; // Profile is always on
     setPortfolio((p) => ({ ...p, enabled: { ...p.enabled, [id]: !p.enabled[id] } }));
+  };
 
-  const reorderSections = (next: SectionId[]) =>
+  const reorderSections = (next: SectionId[]) => {
+    // Safety check: always keep profile at the top
+    if (next[0] !== "profile") {
+      next = ["profile", ...next.filter((id) => id !== "profile")];
+    }
     setPortfolio((p) => ({ ...p, order: next }));
+  };
 
   const setSectionColor = (id: string, color: string) =>
     setPortfolio((p) => ({ ...p, sectionColors: { ...p.sectionColors, [id]: color } }));
@@ -705,8 +718,8 @@ function ThemePicker({
 function ThemeSwatches({ id }: { id: PortfolioThemeId }) {
   const swatches: Record<PortfolioThemeId, string[]> = {
     terminal: ["var(--neon)", "var(--magenta)", "var(--cyan)"],
-    vercel: ["#050505", "#fafafa", "#a1a1aa"],
-    vercelDark: ["#050505", "#27272a", "#f4f4f5"],
+    vercel: ["#000000", "#fafafa", "#a1a1aa"],
+    vercelDark: ["#000000", "#27272a", "#f4f4f5"],
     material: ["#6750a4", "#ffb1c8", "#8bd8bd"],
     editorial: ["#111827", "#d97706", "#f8fafc"],
     studio: ["#111111", "#f43f5e", "#38bdf8"],
@@ -732,29 +745,64 @@ function TemplateSelect({
   value: CustomSectionTemplate;
   onChange: (value: CustomSectionTemplate) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const meta = getCustomSectionTemplateMeta(value);
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <label className="block">
-      <div className="flex items-center justify-between min-h-[18px]">
+    <div ref={ref} className="relative block">
+      <div className="flex items-center justify-between min-h-[18px] mb-1">
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <span className="text-amber">▸</span> template
         </span>
       </div>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as CustomSectionTemplate)}
-        className="mt-1 w-full bg-background border border-border focus:border-neon outline-none px-3 py-2 font-mono text-sm text-foreground transition-colors"
-        aria-label="custom section template"
+      
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between bg-background border border-border hover:border-foreground focus:border-neon outline-none px-3 py-2 font-mono text-sm text-foreground transition-colors text-left"
       >
-        {CUSTOM_SECTION_TEMPLATES.map((template) => (
-          <option key={template.id} value={template.id}>
-            {template.label}
-          </option>
-        ))}
-      </select>
-      <p className="mt-1 font-mono text-[10px] text-muted-foreground/60 truncate">{meta.desc}</p>
-    </label>
+        <span>{meta.label}</span>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 border border-border bg-card py-1 shadow-brutal max-h-72 overflow-y-auto">
+          {CUSTOM_SECTION_TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => {
+                onChange(template.id);
+                setOpen(false);
+              }}
+              className={`w-full flex flex-col items-start px-3 py-2 hover:bg-secondary transition-colors text-left ${
+                value === template.id ? "bg-secondary/50" : ""
+              }`}
+            >
+              <span className={`font-mono text-sm ${value === template.id ? "text-neon font-bold" : "text-foreground"}`}>
+                {template.label}
+              </span>
+              <span className="font-mono text-[10px] text-muted-foreground leading-tight">
+                {template.desc}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}      
+      {/* <p className="mt-1.5 font-mono text-[10px] text-muted-foreground/40 italic">
+        * changing template resets item fields
+      </p> */}
+    </div>
   );
 }
 
@@ -920,6 +968,21 @@ function CustomItemFields({
             placeholder="extra context for the number"
           />
         </div>
+      </div>
+    );
+  }
+
+  if (template === "textBox") {
+    return (
+      <div className="sm:col-span-2">
+        <TextField
+          label="text content"
+          hint="multi-line supported"
+          value={item.description ?? ""}
+          onChange={(e) => onChange({ description: e.target.value })}
+          placeholder="// write something here..."
+          rows={6}
+        />
       </div>
     );
   }

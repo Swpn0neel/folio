@@ -20,7 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { uid } from "@/lib/portfolio";
 
 const INITIAL_SECTIONS = [
-  { id: "profile", name: "profile", desc: "name · avatar · tagline", on: true, accent: "var(--neon)" },
+  { id: "profile", name: "profile", desc: "name · avatar · tag", on: true, accent: "var(--neon)" },
   { id: "bio", name: "bio", desc: "about you · in your words", on: true, accent: "var(--rose)" },
   { id: "socials", name: "socials", desc: "github · x · linkedin · site", on: true, accent: "var(--cyan)" },
   { id: "projects", name: "projects", desc: "what you've built", on: true, accent: "var(--neon)" },
