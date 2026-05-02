@@ -513,7 +513,7 @@ function ThemedProfile({ p, view, accentCss }: { p: Portfolio; view: ThemeView; 
       <ThemedAvatar p={p} view={view} accentCss={accentCss} />
       <div className="min-w-0">
         {showHandle && <p className={view.eyebrow} style={{ color: accentCss }}>@{p.handle || "you"}</p>}
-        <h1 className={`${view.title} mt-3 break-words`}>{p.fullName || "Your Name"}<span style={{ color: accentCss }}>.</span></h1>
+        <h1 className={`${view.title} mt-3 wrap-break-words`}>{p.fullName || "Your Name"}<span style={{ color: accentCss }}>.</span></h1>
         {p.tagline && <p className={`${view.muted} mt-4 max-w-2xl text-base md:text-lg leading-relaxed`}>{p.tagline}</p>}
       </div>
     </section>
@@ -743,8 +743,8 @@ function ThemedCustomItem({
     return (
       <a href={item.link || undefined} target={item.link ? "_blank" : undefined} rel={item.link ? "noreferrer noopener" : undefined} className={`${view.customCard} block overflow-hidden`} style={{ borderColor: accentCss }}>
         {item.imageUrl && <img src={item.imageUrl} alt={item.title || "gallery item"} className={`${view.galleryImage} mb-3 aspect-video w-full object-cover`} />}
-        <p className="break-words text-base font-semibold">{item.title || "untitled"}</p>
-        {item.description && <p className={`${view.muted} mt-2 break-words text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
+        <p className="wrap-break-words text-base font-semibold">{item.title || "untitled"}</p>
+        {item.description && <p className={`${view.muted} mt-2 wrap-break-words text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
         {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
       </a>
     );
@@ -795,7 +795,7 @@ function ThemedItem({
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="break-words text-base font-semibold">{title}</p>
+          <p className="wrap-break-words text-base font-semibold">{title}</p>
           {meta && <p className={`${view.muted} mt-1 text-sm`}>{meta}</p>}
         </div>
         {url && (() => {
@@ -803,7 +803,7 @@ function ThemedItem({
           return <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-70" style={{ color: accentCss }} />;
         })()}
       </div>
-      {desc && <p className={`${view.muted} mt-2 break-words text-base leading-relaxed whitespace-pre-line`}>{desc}</p>}
+      {desc && <p className={`${view.muted} mt-2 wrap-break-words text-base leading-relaxed whitespace-pre-line`}>{desc}</p>}
       {url && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{url}</p>}
     </>
   );
@@ -845,7 +845,7 @@ function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: s
     <Wrapper>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-base font-bold break-words">{item.title || "untitled link"}</p>
+          <p className="font-mono text-base font-bold wrap-break-words">{item.title || "untitled link"}</p>
           {(item.meta ?? item.subheading) && (
             <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
           )}
@@ -855,7 +855,7 @@ function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: s
           return <Icon className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />;
         })()}
       </div>
-      {item.description && <p className="text-sm text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
+      {item.description && <p className="text-sm text-muted-foreground mt-2 wrap-break-words whitespace-pre-line">{item.description}</p>}
       {item.link && <p className="font-mono text-sm mt-3 truncate" style={{ color: accentCss }}>{item.link}</p>}
     </Wrapper>
   );
@@ -864,7 +864,7 @@ function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: s
 function TimelineItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   return (
     <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
-      <p className="font-mono text-xs text-muted-foreground pt-0.5 break-words">
+      <p className="font-mono text-xs text-muted-foreground pt-0.5 wrap-break-words">
         {item.date || item.meta || item.subheading || "now"}
       </p>
       <div className="relative min-w-0 border-l border-border pl-4">
@@ -887,10 +887,10 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
       )}
       <div className="p-3">
         <div className="flex items-start justify-between gap-3">
-          <p className="font-mono text-sm font-bold break-words">{item.title || "untitled"}</p>
+          <p className="font-mono text-sm font-bold wrap-break-words">{item.title || "untitled"}</p>
           {item.link && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
         </div>
-        {item.description && <p className="text-xs text-muted-foreground mt-1 break-words whitespace-pre-line">{item.description}</p>}
+        {item.description && <p className="text-xs text-muted-foreground mt-1 wrap-break-words whitespace-pre-line">{item.description}</p>}
       </div>
     </div>
   );
@@ -907,14 +907,14 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
 function StatItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   const content = (
     <div className="group border border-border bg-background p-4 hover:bg-secondary/50 transition-colors">
-      <p className="font-mono text-4xl font-bold break-words" style={{ color: accentCss }}>
+      <p className="font-mono text-4xl font-bold wrap-break-words" style={{ color: accentCss }}>
         {item.value || "0"}
       </p>
-      <p className="font-mono text-base font-medium mt-1 break-words">{item.title || "metric"}</p>
+      <p className="font-mono text-base font-medium mt-1 wrap-break-words">{item.title || "metric"}</p>
       {(item.meta ?? item.subheading) && (
         <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
       )}
-      {item.description && <p className="text-sm text-muted-foreground mt-2 break-words whitespace-pre-line">{item.description}</p>}
+      {item.description && <p className="text-sm text-muted-foreground mt-2 wrap-break-words whitespace-pre-line">{item.description}</p>}
     </div>
   );
 
@@ -948,12 +948,12 @@ function ProfileBlock({ p, accentCss }: { p: Portfolio; accentCss?: string }) {
         </div>
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <h3 className="font-mono text-3xl font-bold break-words md:text-4xl">
+        <h3 className="font-mono text-3xl font-bold wrap-break-words md:text-4xl">
           {p.fullName || "your_name"}
           <span className="animate-blink" style={{ color: accent }}>_</span>
         </h3>
         {(showHandle || p.tagline) && (
-          <p className="font-mono text-sm mt-1 break-words" style={{ color: accent }}>
+          <p className="font-mono text-sm mt-1 wrap-break-words" style={{ color: accent }}>
             {showHandle && <span>@{p.handle || "you"}</span>}
             {showHandle && p.tagline && <span> · </span>}
             {p.tagline && <span>{p.tagline}</span>}
@@ -1039,9 +1039,9 @@ function Item({ title, meta, desc, url }: { title: string; meta?: string; desc?:
   return (
     <Wrapper>
       <div className="min-w-0">
-        <p className="font-mono text-base font-medium break-words">{title}</p>
+        <p className="font-mono text-base font-medium wrap-break-words">{title}</p>
         {meta && <p className="text-sm font-mono text-muted-foreground mt-0.5">{meta}</p>}
-        {desc && <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-line">{desc}</p>}
+        {desc && <p className="text-sm text-muted-foreground mt-1 wrap-break-words whitespace-pre-line">{desc}</p>}
       </div>
       {url && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
     </Wrapper>
