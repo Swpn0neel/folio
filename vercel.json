@@ -2,6 +2,6 @@
   "version": 2,
   "framework": "vite",
   "installCommand": "bun install",
-  "buildCommand": "NITRO_PRESET=vercel bun run build",
-  "outputDirectory": ".output"
+  "buildCommand": "bun run build:vercel",
+  "outputDirectory": ".vercel/output"
 }
