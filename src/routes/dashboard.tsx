@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useRef } from "react";
-import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2, Palette, ChevronDown } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState, useRef, type ReactNode } from "react";
+import { ExternalLink, Eye, Save, TerminalSquare, RotateCcw, Github, Twitter, Linkedin, Globe, Link2, Mail, Trash2, Palette, ChevronDown, LogOut, AlertTriangle } from "lucide-react";
 import {
   defaultPortfolio,
   loadPortfolio,
@@ -15,12 +15,27 @@ import {
   PORTFOLIO_THEMES,
   getCustomSectionTemplateMeta,
   type PortfolioThemeId,
+  deleteAccount,
 } from "@/lib/portfolio";
 import { Field, TextField, ImageUploadField } from "@/components/dashboard/Field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ListEditor } from "@/components/dashboard/ListEditor";
-import { colorToCss, SECTION_COLOR_GROUPS, SECTION_COLORS, SectionsManager } from "@/components/dashboard/SectionsManager";
+import { SectionsManager } from "@/components/dashboard/SectionsManager";
+import { colorToCss, SECTION_COLOR_GROUPS, SECTION_COLORS } from "@/lib/colors";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Logo } from "@/components/Logo";
+import { supabase } from "@/lib/supabase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const getSocialIcon = (label: string) => {
   const l = label.toLowerCase();
@@ -43,21 +58,36 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const { session, isLoading: isAuthLoading } = useAuth();
+  
   const [portfolio, setPortfolio] = useState<Portfolio>(() => defaultPortfolio());
   const [hydrated, setHydrated] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // hydrate from localStorage on mount
   useEffect(() => {
-    const loaded = loadPortfolio();
-    // Enforce profile at top and enabled
-    loaded.enabled.profile = true;
-    if (loaded.order[0] !== "profile") {
-      loaded.order = ["profile", ...loaded.order.filter((id) => id !== "profile")];
+    if (!isAuthLoading && !session) {
+      navigate({ to: "/login", replace: true });
     }
-    setPortfolio(loaded);
-    setHydrated(true);
-  }, []);
+  }, [session, isAuthLoading, navigate]);
+
+  // hydrate from Supabase on mount
+  useEffect(() => {
+    if (!session) return;
+    
+    loadPortfolio().then((loaded) => {
+      // Enforce profile at top and enabled
+      loaded.enabled.profile = true;
+      if (loaded.order[0] !== "profile") {
+        loaded.order = ["profile", ...loaded.order.filter((id) => id !== "profile")];
+      }
+      setPortfolio(loaded);
+      setHydrated(true);
+    });
+  }, [session]);
 
   // autosave (debounced) once hydrated
   useEffect(() => {
@@ -172,16 +202,25 @@ function Dashboard() {
       [key]: (p[key] as Array<{ id: string }>).filter((it) => it.id !== id),
     } as Portfolio));
 
+  const reorderItems = <K extends "socials" | "projects" | "blogs" | "experience" | "achievements">(
+    key: K,
+    next: Portfolio[K]
+  ) => setPortfolio((p) => ({ ...p, [key]: next } as Portfolio));
+
   // ── Custom sections helpers ─────────────────────────────────────────────────
 
   const addCustomSection = (title: string) => {
     const id = `custom:${uid()}`;
     const section: CustomSection = { id, title, template: "simple", items: [] };
+    const theme = portfolio.theme ?? "terminal";
+    const defaultColor = (SECTION_COLOR_GROUPS[theme] ?? SECTION_COLOR_GROUPS.terminal)[0].key;
+
     setPortfolio((p) => ({
       ...p,
       customSections: [...(p.customSections ?? []), section],
       order: [...p.order, id],
       enabled: { ...p.enabled, [id]: true },
+      sectionColors: { ...p.sectionColors, [id]: defaultColor },
     }));
   };
 
@@ -242,83 +281,21 @@ function Dashboard() {
       ),
     }));
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 font-mono font-bold text-sm shrink-0">
-            <span>~/folio</span>
-            <span className="text-muted-foreground hidden sm:inline">/dashboard</span>
-          </Link>
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground">
-              <span className={`h-1.5 w-1.5 ${savedAt ? "bg-neon" : "bg-amber"} ${savedAt ? "shadow-glow-neon" : ""}`} />
-              {savedLabel}
-            </span>
-            <button
-              onClick={reset}
-              className="inline-flex items-center gap-1 px-2.5 h-8 border border-border hover:border-destructive hover:text-destructive transition-colors"
-              title="reset portfolio"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">reset</span>
-            </button>
-            <Link
-              to="/u/$handle"
-              params={{ handle: portfolio.handle || "you" }}
-              className="inline-flex items-center gap-1 px-2.5 h-8 border border-border hover:border-cyan hover:text-cyan transition-colors"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">view live</span>
-            </Link>
-            <button
-              onClick={() => {
-                savePortfolio(portfolio);
-                setSavedAt(Date.now());
-              }}
-              className="inline-flex items-center gap-1 px-3 h-8 bg-neon text-background font-bold hover:shadow-glow-neon transition-shadow"
-            >
-              <Save className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">save</span>
-            </button>
-          </div>
-        </div>
-      </header>
+  const reorderCustomItems = (sectionId: string, next: CustomSectionItem[]) =>
+    setPortfolio((p) => ({
+      ...p,
+      customSections: (p.customSections ?? []).map((s) =>
+        s.id === sectionId ? { ...s, items: next } : s
+      ),
+    }));
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6">
-        {/* Editor */}
-        <div className="space-y-6 pb-6">
-          <div className="flex items-center mb-3 h-4">
-            <p className="font-mono text-xs text-muted-foreground tracking-tight">
-              <span className="text-amber">// </span> editor
-            </p>
-          </div>
-          {/* Sections manager */}
-          <Card title="sections" subtitle="toggle & drag to reorder">
-            <SectionsManager
-              theme={portfolio.theme ?? "terminal"}
-              order={portfolio.order}
-              enabled={portfolio.enabled}
-              sectionColors={portfolio.sectionColors ?? {}}
-              customSections={portfolio.customSections ?? []}
-              onReorder={reorderSections}
-              onToggle={toggleSection}
-              onColorChange={setSectionColor}
-              onRemoveCustom={removeCustomSection}
-              onAddCustom={addCustomSection}
-            />
-          </Card>
+  const renderSectionEditor = (id: SectionId) => {
+    if (!portfolio.enabled[id]) return null;
 
-          <Card title="theme" subtitle="choose portfolio presentation">
-            <ThemePicker
-              value={portfolio.theme ?? "terminal"}
-              onChange={changeTheme}
-            />
-          </Card>
-
-          {/* Profile */}
-          <Card title="profile" subtitle="who are you?" shadowCss={sc("profile")}>
+    switch (id) {
+      case "profile":
+        return (
+          <Card key={id} title="profile" subtitle="who are you?" shadowCss={sc("profile")}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field
                 label="full name"
@@ -357,13 +334,14 @@ function Dashboard() {
               placeholder="staff engineer @ vercel"
             />
           </Card>
-
-          {/* Bio */}
-          <Card title="bio" subtitle="tell visitors who you are" shadowCss={sc("bio")}>
+        );
+      case "bio":
+        return (
+          <Card key={id} title="bio" subtitle="tell visitors who you are" shadowCss={sc("bio")}>
             <TextField
               label="about"
-              hint={`${(portfolio.bio || "").length}/500 · optional`}
-              maxLength={500}
+              hint={`${(portfolio.bio || "").length}/2000 · optional`}
+              maxLength={2000}
               value={portfolio.bio}
               onChange={(e) => update("bio", e.target.value)}
               placeholder={"// what do you build?\n// what do you care about?\n// what makes you, you?"}
@@ -373,9 +351,10 @@ function Dashboard() {
               <span className="text-neon">→</span> shown below your name on your public page. keep it sharp.
             </p>
           </Card>
-
-          {/* Socials */}
-          <Card title="socials" subtitle="links visitors should follow" shadowCss={sc("socials")}>
+        );
+      case "socials":
+        return (
+          <Card key={id} title="socials" subtitle="links visitors should follow" shadowCss={sc("socials")}>
             <ListEditor
               title="links"
               accent="text-cyan"
@@ -383,6 +362,7 @@ function Dashboard() {
               getId={(s) => s.id}
               onAdd={() => addItem("socials", { id: uid(), label: "", url: "" })}
               onRemove={(id) => removeItem("socials", id)}
+              onReorder={(next) => reorderItems("socials", next)}
               renderItem={(s) => {
                 const Icon = getSocialIcon(s.label);
                 return (
@@ -409,9 +389,10 @@ function Dashboard() {
               }}
             />
           </Card>
-
-          {/* Projects */}
-          <Card title="projects" subtitle="what you've shipped" shadowCss={sc("projects")}>
+        );
+      case "projects":
+        return (
+          <Card key={id} title="projects" subtitle="what you've shipped" shadowCss={sc("projects")}>
             <ListEditor
               title="projects"
               accent="text-neon"
@@ -419,6 +400,7 @@ function Dashboard() {
               getId={(p) => p.id}
               onAdd={() => addItem("projects", { id: uid(), name: "", description: "", url: "", tech: "" })}
               onRemove={(id) => removeItem("projects", id)}
+              onReorder={(next) => reorderItems("projects", next)}
               renderItem={(pr) => (
                 <>
                   <Field
@@ -453,9 +435,10 @@ function Dashboard() {
               )}
             />
           </Card>
-
-          {/* Blogs */}
-          <Card title="blogs" subtitle="featured writing" shadowCss={sc("blogs")}>
+        );
+      case "blogs":
+        return (
+          <Card key={id} title="blogs" subtitle="featured writing" shadowCss={sc("blogs")}>
             <ListEditor
               title="posts"
               accent="text-magenta"
@@ -463,6 +446,7 @@ function Dashboard() {
               getId={(b) => b.id}
               onAdd={() => addItem("blogs", { id: uid(), title: "", url: "", meta: "" })}
               onRemove={(id) => removeItem("blogs", id)}
+              onReorder={(next) => reorderItems("blogs", next)}
               renderItem={(b) => (
                 <>
                   <div className="sm:col-span-2">
@@ -490,9 +474,10 @@ function Dashboard() {
               )}
             />
           </Card>
-
-          {/* Experience */}
-          <Card title="experience" subtitle="where you've worked" shadowCss={sc("experience")}>
+        );
+      case "experience":
+        return (
+          <Card key={id} title="experience" subtitle="where you've worked" shadowCss={sc("experience")}>
             <ListEditor
               title="roles"
               accent="text-cyan"
@@ -500,6 +485,7 @@ function Dashboard() {
               getId={(e) => e.id}
               onAdd={() => addItem("experience", { id: uid(), role: "", company: "", startDate: "", endDate: "", isCurrent: true, description: "" })}
               onRemove={(id) => removeItem("experience", id)}
+              onReorder={(next) => reorderItems("experience", next)}
               renderItem={(e) => (
                 <>
                   <Field
@@ -561,9 +547,10 @@ function Dashboard() {
               )}
             />
           </Card>
-
-          {/* Achievements */}
-          <Card title="achievements" subtitle="talks · awards · milestones" shadowCss={sc("achievements")}>
+        );
+      case "achievements":
+        return (
+          <Card key={id} title="achievements" subtitle="talks · awards · milestones" shadowCss={sc("achievements")}>
             <ListEditor
               title="achievements"
               accent="text-amber"
@@ -571,6 +558,7 @@ function Dashboard() {
               getId={(a) => a.id}
               onAdd={() => addItem("achievements", { id: uid(), title: "", meta: "" })}
               onRemove={(id) => removeItem("achievements", id)}
+              onReorder={(next) => reorderItems("achievements", next)}
               renderItem={(a) => (
                 <>
                   <Field
@@ -590,10 +578,13 @@ function Dashboard() {
               )}
             />
           </Card>
-
-          {/* Custom section editors — one card per custom section */}
-          {(portfolio.customSections ?? []).map((section) => (
-            <Card key={section.id} title={section.title || "untitled section"} subtitle="custom section" shadowCss={sc(section.id)}>
+        );
+      default:
+        if (id.startsWith("custom:")) {
+          const section = (portfolio.customSections ?? []).find((s) => s.id === id);
+          if (!section) return null;
+          return (
+            <Card key={id} title={section.title || "untitled section"} subtitle="custom section" shadowCss={sc(id)}>
               <div className="space-y-4">
                 {/* Section title */}
                 <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_220px] gap-3">
@@ -610,49 +601,139 @@ function Dashboard() {
                 </div>
 
                 {/* Items */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-magenta">
-                      {">"} {getCustomSectionTemplateMeta(section.template ?? "simple").label}
-                    </h3>
-                    <p className="font-mono text-[10px] text-muted-foreground">
-                      {getCustomSectionTemplateMeta(section.template ?? "simple").desc}
-                    </p>
-                  </div>
-                  {section.items.map((item, idx) => (
-                    <div key={item.id} className="border border-border/60 p-3 space-y-3 bg-background/50">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-                          <span className="text-magenta">#</span> item {idx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeCustomItem(section.id, item.id)}
-                          className="text-muted-foreground/40 hover:text-destructive transition-colors"
-                          title="remove item"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
+                <ListEditor
+                  title={getCustomSectionTemplateMeta(section.template ?? "simple").label}
+                  subtitle={getCustomSectionTemplateMeta(section.template ?? "simple").desc}
+                  accent="text-magenta"
+                  items={section.items}
+                  getId={(it) => it.id}
+                  onAdd={() => addCustomItem(section.id)}
+                  onRemove={(itemId) => removeCustomItem(section.id, itemId)}
+                  onReorder={(next) => reorderCustomItems(section.id, next)}
+                  addLabel="add item"
+                  renderItem={(item) => (
+                    <div className="sm:col-span-2">
                       <CustomItemFields
                         template={section.template ?? "simple"}
                         item={item}
                         onChange={(patch) => updateCustomItem(section.id, item.id, patch)}
                       />
                     </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={() => addCustomItem(section.id)}
-                    className="w-full flex items-center justify-center gap-1.5 border border-dashed border-border hover:border-magenta hover:text-magenta text-muted-foreground font-mono text-xs py-2 transition-colors"
-                  >
-                    + add item
-                  </button>
-                </div>
+                  )}
+                />
               </div>
             </Card>
-          ))}
+          );
+        }
+        return null;
+    }
+  };
+
+  if (isAuthLoading || (!session && !isAuthLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="font-mono text-xs text-muted-foreground">authenticating<span className="animate-blink">_</span></p>
+      </div>
+    );
+  }
+
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="font-mono text-xs text-muted-foreground">loading_portfolio<span className="animate-blink">_</span></p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+          <Link to="/" className="flex items-center gap-2.5 font-mono font-bold text-sm shrink-0 group leading-none">
+            <Logo className="h-5 w-5 group-hover:text-neon transition-colors" />
+            <span className="leading-none">~/folio</span>
+            <span className="text-muted-foreground hidden sm:inline leading-none">/dashboard</span>
+          </Link>
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-muted-foreground">
+              <span className={`h-1.5 w-1.5 ${savedAt ? "bg-neon" : "bg-amber"} ${savedAt ? "shadow-glow-neon" : ""}`} />
+              {savedLabel}
+            </span>
+            <button
+              onClick={reset}
+              className="inline-flex items-center gap-1 px-2.5 h-8 border border-border hover:border-destructive hover:text-destructive transition-colors"
+              title="reset portfolio"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">reset</span>
+            </button>
+            <Link
+              to="/u/$handle"
+              params={{ handle: portfolio.handle || "you" }}
+              className="inline-flex items-center gap-1 px-2.5 h-8 border border-border hover:border-cyan hover:text-cyan transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">view live</span>
+            </Link>
+            <button
+              onClick={() => setShowLogoutDialog(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 h-8 border border-border hover:border-destructive hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-200"
+              title="log out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline font-mono text-[11px] uppercase tracking-wider">logout</span>
+            </button>
+            <button
+              onClick={async () => {
+                setIsSaving(true);
+                await savePortfolio(portfolio);
+                setSavedAt(Date.now());
+                setIsSaving(false);
+              }}
+              disabled={isSaving}
+              className="inline-flex items-center gap-1 px-3 h-8 bg-neon text-background font-bold hover:shadow-glow-neon transition-shadow disabled:opacity-50"
+            >
+              <Save className={`h-3.5 w-3.5 ${isSaving ? "animate-pulse" : ""}`} />
+              <span className="hidden sm:inline">{isSaving ? "saving..." : "save"}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6">
+        {/* Editor */}
+        <div className="space-y-6 pb-6">
+          <div className="flex items-center mb-3 h-4">
+            <p className="font-mono text-xs text-muted-foreground tracking-tight">
+              <span className="text-amber">// </span> editor
+            </p>
+          </div>
+          {/* Sections manager */}
+          <Card title="sections" subtitle="toggle & drag to reorder">
+            <SectionsManager
+              theme={portfolio.theme ?? "terminal"}
+              order={portfolio.order}
+              enabled={portfolio.enabled}
+              sectionColors={portfolio.sectionColors ?? {}}
+              customSections={portfolio.customSections ?? []}
+              onReorder={reorderSections}
+              onToggle={toggleSection}
+              onColorChange={setSectionColor}
+              onRemoveCustom={removeCustomSection}
+              onAddCustom={addCustomSection}
+            />
+          </Card>
+
+          <Card title="theme" subtitle="choose portfolio presentation">
+            <ThemePicker
+              value={portfolio.theme ?? "terminal"}
+              onChange={changeTheme}
+            />
+          </Card>
+
+          {/* Dynamic Sections mapped from order */}
+          {portfolio.order.map((id) => renderSectionEditor(id))}
         </div>
 
         {/* Live preview */}
@@ -674,6 +755,77 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="border-border shadow-brutal max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-mono text-lg uppercase tracking-tight flex items-center gap-2">
+              <LogOut className="h-5 w-5 text-amber" />
+              terminate session?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-mono text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to log out? You'll need to sign back in to edit your folio.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-3">
+            <AlertDialogCancel className="border-border hover:bg-foreground hover:text-background font-mono text-[11px] uppercase tracking-widest h-9 transition-colors">
+              cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/", replace: true });
+              }}
+              className="bg-foreground text-background hover:bg-foreground/90 font-mono text-[11px] uppercase tracking-widest font-bold h-9"
+            >
+              confirm_logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+          
+          <div className="pt-6 mt-4 border-t border-border/50">
+            <button
+              onClick={() => {
+                setShowLogoutDialog(false);
+                setShowDeleteDialog(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-destructive transition-colors group"
+            >
+              <Trash2 className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+              permanently delete account
+            </button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="border-destructive shadow-brutal-destructive max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-mono text-lg uppercase tracking-tight flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              danger_zone
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-mono text-xs text-muted-foreground leading-relaxed">
+              This action is irreversible. Your handle <span className="text-foreground">@{portfolio.handle}</span> will be released, and all your projects, gallery images, and links will be wiped from our database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="border-border hover:bg-foreground hover:text-background font-mono text-[11px] uppercase tracking-widest h-9 transition-colors">
+              abort
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await deleteAccount();
+                navigate({ to: "/", replace: true });
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-mono text-[11px] uppercase tracking-widest font-bold h-9"
+            >
+              delete_forever
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -799,9 +951,6 @@ function TemplateSelect({
           ))}
         </div>
       )}      
-      {/* <p className="mt-1.5 font-mono text-[10px] text-muted-foreground/40 italic">
-        * changing template resets item fields
-      </p> */}
     </div>
   );
 }
@@ -1033,22 +1182,21 @@ function Card({
 }: {
   title: string;
   subtitle?: string;
-  /** When set, overrides the brutal shadow color. Omit to keep the default neon green. */
   shadowCss?: string;
   children: React.ReactNode;
 }) {
   return (
     <section
-      className={`border border-border bg-card ${shadowCss ? "" : "shadow-brutal"}`}
-      style={shadowCss ? { boxShadow: `6px 6px 0 0 ${shadowCss}` } : undefined}
+      className="border border-border bg-background p-5 transition-all duration-300"
+      style={{ boxShadow: `6px 6px 0 0 ${shadowCss || "var(--neon)"}` }}
     >
-      <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-secondary">
-        <p className="font-mono text-xs font-bold">
-          <span className="text-neon">$</span> {title}
-        </p>
-        {subtitle && <p className="font-mono text-[10px] text-muted-foreground">{subtitle}</p>}
+      <div className="flex flex-col gap-1 mb-5">
+        <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
+          <span className="text-neon">●</span> {title}
+        </h3>
+        {subtitle && <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">{subtitle}</p>}
       </div>
-      <div className="p-4 space-y-4">{children}</div>
+      <div className="space-y-4">{children}</div>
     </section>
   );
 }

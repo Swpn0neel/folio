@@ -1,10 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Github } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { z } from "zod";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { TerminalField } from "@/components/auth/TerminalField";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: z.object({
+    handle: z.string().optional(),
+  }),
   head: () => ({
     meta: [
       { title: "signup — folio" },
@@ -16,20 +21,68 @@ export const Route = createFileRoute("/signup")({
 
 function SignupPage() {
   const navigate = useNavigate();
-  const [handle, setHandle] = useState("");
+  const search = Route.useSearch();
+  const [handle, setHandle] = useState(search.handle ?? "");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { session, isLoading: isAuthLoading } = useAuth();
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (handle) {
-      try {
-        localStorage.setItem("folio:handle", handle);
-      } catch {
-        // ignore (SSR / privacy mode)
-      }
+  useEffect(() => {
+    if (!isAuthLoading && session) {
+      navigate({ to: "/dashboard", replace: true });
     }
-    navigate({ to: "/dashboard" });
+  }, [session, isAuthLoading, navigate]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      // 1. Check handle uniqueness
+      const { data: existingProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("handle", handle)
+        .single();
+
+      if (profileError && profileError.code !== "PGRST116") {
+        throw profileError;
+      }
+      if (existingProfile) {
+        setError("handle is already taken.");
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Sign up
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            handle: handle, // The database trigger will pick this up
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Check if email confirmation is required
+      if (!authData.session) {
+        setError("Please check your email to verify your account.");
+        setIsLoading(false);
+        return;
+      }
+
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      setError(err.message || "An error occurred during signup.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,22 +99,15 @@ function SignupPage() {
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <button
-          type="button"
-          className="w-full inline-flex items-center justify-center gap-2 h-10 border border-border hover:border-neon hover:text-neon transition-colors font-mono text-sm"
-        >
-          <Github className="h-4 w-4" /> signup --provider github
-        </button>
-
-        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground">
-          <span className="flex-1 h-px bg-border" />
-          OR
-          <span className="flex-1 h-px bg-border" />
-        </div>
+        {error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive font-mono text-xs">
+            {error}
+          </div>
+        )}
 
         <TerminalField
           label="handle"
-          prefix="folio.dev/u/"
+          prefix="folio.vercel.app/u/"
           required
           pattern="[a-zA-Z0-9_-]+"
           placeholder="yourhandle"
@@ -88,16 +134,11 @@ function SignupPage() {
 
         <button
           type="submit"
-          className="w-full h-10 bg-neon text-background font-mono font-bold text-sm hover:shadow-glow-neon transition-shadow"
+          disabled={isLoading}
+          className="w-full h-10 bg-neon text-background font-mono font-bold text-sm hover:shadow-glow-neon transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          $ init --portfolio
+          {isLoading ? "$ processing..." : "$ init --portfolio"}
         </button>
-
-        <div className="text-center">
-          <Link to="/dashboard" className="font-mono text-[11px] text-muted-foreground hover:text-neon">
-            // skip auth → try dashboard
-          </Link>
-        </div>
       </form>
     </AuthShell>
   );

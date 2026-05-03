@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 import appCss from "../styles.css?url";
 
@@ -30,7 +31,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Folio — Beautiful portfolios for developers" },
-      { name: "description", content: "Build a stunning developer portfolio in minutes. Showcase your projects, blogs, and experience on your own folio.dev/u/handle." },
+      { name: "description", content: "Build a stunning developer portfolio in minutes. Showcase your projects, blogs, and experience on your own folio.vercel.app/u/handle." },
       { name: "author", content: "Folio" },
       { property: "og:title", content: "Folio — Beautiful portfolios for developers" },
       { property: "og:description", content: "Build a stunning developer portfolio in minutes. Drag, drop, ship." },
@@ -39,6 +40,7 @@ export const Route = createRootRoute({
       { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMicgZmlsbD0nbm9uZSc+PHJlY3QgeD0nMicgeT0nMicgd2lkdGg9JzI4JyBoZWlnaHQ9JzI4JyBzdHJva2U9J3doaXRlJyBzdHJva2Utd2lkdGg9JzIuNScvPjxwYXRoIGQ9J00xMiAyMlYxMEgyME0xMiAxNkgxOCcgc3Ryb2tlPSd3aGl0ZScgc3Ryb2tlLXdpZHRoPScyLjUnIHN0cm9rZS1saW5lY2FwPSdzcXVhcmUnLz48cmVjdCB4PScyMCcgeT0nMjAnIHdpZHRoPSc0JyBoZWlnaHQ9JzQnIGZpbGw9JyNhM2U2MzUnLz48L3N2Zz4=" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" },
@@ -65,5 +67,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
 }

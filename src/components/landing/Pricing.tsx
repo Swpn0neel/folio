@@ -6,7 +6,7 @@ const tiers = [
     name: "Hacker",
     price: "Free",
     desc: "Everything you need to ship a great portfolio.",
-    features: ["folio.dev/u/handle", "All sections unlocked", "Drag-to-reorder", "Unlimited updates"],
+    features: ["folio.vercel.app/u/handle", "All sections unlocked", "Drag-to-reorder", "Unlimited updates"],
     cta: "Start free",
     featured: false,
   },

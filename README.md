@@ -1,75 +1,84 @@
-# Folio
+# Folio — Premium Portfolio Engine
 
-A premium portfolio generation platform built with TanStack Start, React 19, and Tailwind CSS 4.
+Folio is a state-of-the-art portfolio generation platform designed for developers, designers, and creatives who want a professional, high-performance web presence without the overhead of manual coding. Built with the cutting-edge **TanStack Start** framework, it offers a seamless, type-safe development experience and ultra-fast performance.
 
-## Features
+![Folio Preview](./public/landing.png)
 
-- **TanStack Start Architecture**: Full-stack React application with server-side rendering and type-safe routing.
-- **Dynamic Portfolio Renderer**: Customizable portfolio templates and sections.
-- **Interactive UI Components**: Built using Radix UI primitives and Tailwind CSS 4 for a premium look and feel.
-- **Responsive Design**: Mobile-first approach ensuring your portfolio looks great on any device.
-- **Type-Safe Development**: Leverages TypeScript and Zod for robust data validation and developer experience.
-- **TanStack Query & Router**: State management and routing handled by the industry-standard TanStack suite.
-- **Drag and Drop**: Integration with `@dnd-kit` for intuitive portfolio layout management.
+## ✨ Key Features
+
+### Advanced Theme System
+Folio comes with a set of meticulously crafted themes, each offering a distinct aesthetic:
+- **Terminal**: A brutalist, command-line inspired theme for a "hacker" aesthetic.
+- **Vercel (Light/Dark)**: Clean, high-contrast minimalist design inspired by modern development tools.
+- **Material You**: Dynamic, color-adaptive theme with soft edges and fluid layouts.
+- **Editorial**: A sophisticated, typography-first layout resembling a premium magazine.
+- **Studio**: Bold, high-energy design with glowing accents and deep shadows.
+
+### Intuitive Dashboard
+- **Live Preview**: See changes in real-time as you edit your portfolio content and settings.
+- **Drag-and-Drop Management**: Reorder sections instantly using a smooth `@dnd-kit` powered interface.
+- **Custom Sections**: Beyond standard bio and projects, create custom sections using templates like:
+    - **Gallery**: Visual grids for photography or design work.
+    - **Stats**: Highlight metrics like GitHub stars, years of experience, or coffee consumed.
+    - **Timeline**: Perfect for career milestones or project history.
+    - **Link Cards**: Elegant grid of external resources.
+- **Granular Customization**: Override global themes with per-section accent colors using a curated palette of 30+ modern colors (OKLCH supported).
+
+### Performance & Infrastructure
+- **TanStack Start**: Leveraging the latest in React server components and streaming for lightning-fast loads.
+- **Supabase Integration**: Robust authentication and real-time database persistence.
+- **Image Handling**: Integrated support for avatar and gallery image uploads.
+- **SEO Optimized**: Public portfolios are served on dynamic, SEO-friendly routes (`/u/username`).
 
 ## Tech Stack
 
-- **Framework**: [TanStack Start](https://tanstack.com/start)
-- **Frontend**: [React 19](https://react.dev/)
+- **Core**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Framework**: [TanStack Start](https://tanstack.com/start) (featuring TanStack Router & Query)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Routing**: [TanStack Router](https://tanstack.com/router)
-- **Data Fetching**: [TanStack Query](https://tanstack.com/query)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **UI Primitives**: [Radix UI](https://www.radix-ui.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Forms**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+- **Drag & Drop**: [@dnd-kit](https://dndkit.com/)
+- **Validation**: [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (Latest LTS recommended)
-- `npm` (preferred) or `bun`
+- [Bun](https://bun.sh/) (Recommended) or Node.js (Latest LTS)
+- A [Supabase](https://supabase.com/) project
 
 ### Installation
 
-1. Install dependencies:
+1. **Clone the repository:**
    ```bash
-   npm install
-   # or
+   git clone https://github.com/your-username/folio.git
+   cd folio
+   ```
+
+2. **Install dependencies:**
+   ```bash
    bun install
    ```
 
-2. Start the development server:
+3. **Configure Environment Variables:**
+   Copy the example environment file and fill in your Supabase credentials:
    ```bash
-   npm run dev
-   # or
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` and add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+
+4. **Start Development Server:**
+   ```bash
    bun dev
    ```
+   Your app will be running at `http://localhost:3000`.
 
-### Building for Production
+### Database Setup
 
-```bash
-npm run build
-# or
-bun run build
-```
+Folio uses Supabase for data persistence. Ensure your Supabase project has the necessary tables by running the SQL in `supabase/schema.sql` within your Supabase SQL Editor:
+- `portfolios`: Stores user portfolio configuration, themes, and section visibility.
 
-## Project Structure
+---
 
-- `src/routes`: TanStack Router file-based routing.
-  - `index.tsx`: Main landing page for Folio.
-  - `login.tsx` / `signup.tsx`: User authentication flows.
-  - `dashboard.tsx`: Private area for users to manage their portfolios.
-  - `u.$handle.tsx`: Dynamic route for rendering public portfolios.
-- `src/components`: Reusable UI components and feature-specific components.
-  - `portfolio/`: Logic for rendering the final portfolio view.
-  - `dashboard/`: Components used in the portfolio management interface.
-  - `landing/`: Landing page sections.
-  - `ui/`: Shared primitive components (shadcn/ui style).
-- `src/hooks`: Custom React hooks for state and interaction.
-- `src/lib`: Utility functions and shared libraries.
-- `src/styles.css`: Global styles and Tailwind configuration.
-
-## License
-
-MIT
+Built with ❤️ by Swapnoneel

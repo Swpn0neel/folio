@@ -165,6 +165,7 @@ export function getSectionMeta(id: SectionId, customSections: CustomSection[]): 
 }
 
 const STORAGE_KEY = "folio:portfolio";
+import { supabase } from "./supabase";
 
 function normalizeCustomItem(item: Partial<CustomSectionItem>): CustomSectionItem {
   const meta = item.meta ?? item.subheading ?? "";
@@ -192,9 +193,9 @@ export const defaultPortfolio = (): Portfolio => ({
   theme: "terminal",
   handle: "you",
   showHandle: true,
-  fullName: "Your Name",
+  fullName: "",
   avatarUrl: "",
-  tagline: "engineer · builder · writer",
+  tagline: "",
   bio: "",
   enabled: {
     profile: true,
@@ -202,36 +203,46 @@ export const defaultPortfolio = (): Portfolio => ({
     socials: true,
     projects: true,
     blogs: true,
-    experience: false,
-    achievements: false,
+    experience: true,
+    achievements: true,
   },
-  sectionColors: {},
+  sectionColors: {
+    profile: "neon",
+    bio: "neon",
+    socials: "neon",
+    projects: "neon",
+    blogs: "neon",
+    experience: "neon",
+    achievements: "neon",
+  },
   order: ["profile", "bio", "socials", "projects", "blogs", "experience", "achievements"],
-  socials: [
-    { id: "s1", label: "github", url: "https://github.com/" },
-  ],
-  projects: [
-    {
-      id: "p1",
-      name: "my-first-project",
-      description: "a short, punchy line about what it does and why it's cool.",
-      url: "https://github.com/",
-      tech: "typescript · react",
-    },
-  ],
+  socials: [],
+  projects: [],
   blogs: [],
   experience: [],
   achievements: [],
   customSections: [],
 });
 
-export function loadPortfolio(): Portfolio {
-  if (typeof window === "undefined") return defaultPortfolio();
+export async function loadPortfolio(): Promise<Portfolio> {
+  const base = defaultPortfolio();
+  if (typeof window === "undefined") return base;
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultPortfolio();
-    const parsed = JSON.parse(raw) as Partial<Portfolio>;
-    const base = defaultPortfolio();
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return base;
+
+    const { data, error } = await supabase
+      .from("portfolios")
+      .select("data")
+      .eq("user_id", sessionData.session.user.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error loading portfolio:", error);
+    }
+
+    const parsed = data?.data ? (data.data as Partial<Portfolio>) : {};
     let order = parsed.order && parsed.order.length ? parsed.order : base.order;
     // Migrate: inject "bio" after "profile" if missing from saved order
     if (!order.includes("bio")) {
@@ -246,20 +257,33 @@ export function loadPortfolio(): Portfolio {
     const customSections: CustomSection[] = (parsed.customSections ?? []).map(normalizeCustomSection);
     // Ensure any custom section IDs present in customSections are represented in order / enabled
     const customIds = customSections.map((s) => s.id);
+    const validOrder = order.filter((id) => {
+      if (id.startsWith("custom:")) return customIds.includes(id);
+      return true;
+    });
     const mergedOrder = [
-      ...order.filter((id) => !id.startsWith("custom:")),
-      ...customIds.filter((id) => order.includes(id)),
-      ...customIds.filter((id) => !order.includes(id)), // newly added
+      ...validOrder,
+      ...customIds.filter((id) => !validOrder.includes(id)), // newly added
     ];
     const customEnabled: Record<string, boolean> = {};
     for (const id of customIds) {
       customEnabled[id] = parsed.enabled?.[id] ?? true;
     }
+
+    // Always enforce the handle from the user's profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("handle")
+      .eq("id", sessionData.session.user.id)
+      .single();
+    
+    const actualHandle = profile?.handle || base.handle;
+
     return {
       ...base,
       ...parsed,
       theme: isPortfolioThemeId(parsed.theme) ? parsed.theme : base.theme,
-      handle: parsed.handle || base.handle, // Fallback to "you" if empty
+      handle: actualHandle, // Force actual handle
       enabled: { ...base.enabled, ...(parsed.enabled ?? {}), ...customEnabled },
       sectionColors: parsed.sectionColors ?? {},
       order: mergedOrder,
@@ -270,25 +294,78 @@ export function loadPortfolio(): Portfolio {
       achievements: parsed.achievements ?? [],
       customSections,
     };
-  } catch {
-    return defaultPortfolio();
+  } catch (err) {
+    console.error("Failed to load portfolio", err);
+    return base;
   }
 }
 
-export function savePortfolio(p: Portfolio) {
+export async function savePortfolio(p: Portfolio) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-    if (p.handle) localStorage.setItem("folio:handle", p.handle);
-  } catch {
-    // ignore quota / privacy errors
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return;
+
+    // Use upsert to create or update the portfolio
+    const { error } = await supabase
+      .from("portfolios")
+      .upsert({
+        user_id: sessionData.session.user.id,
+        handle: p.handle,
+        data: p,
+      }, { onConflict: "user_id" });
+
+    if (error) {
+      console.error("Failed to save portfolio:", error);
+    }
+  } catch (err) {
+    console.error("Exception saving portfolio:", err);
   }
 }
 
-export function loadPortfolioByHandle(handle: string): Portfolio | null {
-  const p = loadPortfolio();
-  if (p.handle.toLowerCase() === handle.toLowerCase()) return p;
-  return null;
+export async function loadPortfolioByHandle(handle: string): Promise<{ portfolio: Portfolio; userId: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from("portfolios")
+      .select("data, user_id")
+      .eq("handle", handle)
+      .single();
+    
+    if (error || !data) return null;
+    return {
+      portfolio: data.data as Portfolio,
+      userId: data.user_id,
+    };
+  } catch (err) {
+    console.error("Failed to load portfolio by handle:", err);
+    return null;
+  }
+}
+
+export async function deleteAccount() {
+  if (typeof window === "undefined") return;
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return;
+
+    // Call the RPC to delete everything including auth.users record
+    // This function must be defined in the database (see schema.sql)
+    const { error: rpcError } = await supabase.rpc("delete_user_account");
+    
+    if (rpcError) {
+      console.error("RPC deletion failed:", rpcError);
+      // Fallback: delete application data only
+      const userId = sessionData.session.user.id;
+      await supabase.from("portfolios").delete().eq("user_id", userId);
+      await supabase.from("profiles").delete().eq("id", userId);
+    }
+
+    // Always sign out to clear local session
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.error("Exception deleting account:", err);
+    throw err;
+  }
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 9);

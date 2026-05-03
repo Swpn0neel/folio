@@ -27,11 +27,8 @@ export function CTA() {
               free forever. no credit card. no catch.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center font-mono text-sm">
-              <Link to="/dashboard" className="inline-flex items-center justify-center gap-2 px-5 h-11 bg-neon text-background font-bold hover:shadow-glow-neon transition-shadow">
+              <Link to="/signup" className="inline-flex items-center justify-center gap-2 px-5 h-11 bg-neon text-background font-bold hover:shadow-glow-neon transition-shadow">
                 claim your folio <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link to="/signup" className="inline-flex items-center justify-center gap-2 px-5 h-11 border border-border hover:border-neon hover:text-neon transition-colors">
-                <Github className="h-4 w-4" /> auth --provider github
               </Link>
             </div>
           </div>

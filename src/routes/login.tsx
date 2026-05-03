@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Github } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { TerminalField } from "@/components/auth/TerminalField";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -16,13 +17,54 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { session, isLoading: isAuthLoading } = useAuth();
 
-  const onSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!isAuthLoading && session) {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [session, isAuthLoading, navigate]);
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Backend auth wired up later; for now just go to dashboard.
-    navigate({ to: "/dashboard" });
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      let emailToUse = loginId;
+
+      // If it doesn't look like an email, assume it's a handle
+      if (!loginId.includes("@")) {
+        const { data, error: rpcError } = await supabase.rpc("get_email_by_handle", {
+          p_handle: loginId,
+        });
+
+        if (rpcError) throw rpcError;
+        if (!data) {
+          setError("handle not found.");
+          setIsLoading(false);
+          return;
+        }
+        emailToUse = data;
+      }
+
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: emailToUse,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,26 +81,19 @@ function LoginPage() {
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <button
-          type="button"
-          className="w-full inline-flex items-center justify-center gap-2 h-10 border border-border hover:border-neon hover:text-neon transition-colors font-mono text-sm"
-        >
-          <Github className="h-4 w-4" /> auth --provider github
-        </button>
-
-        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground">
-          <span className="flex-1 h-px bg-border" />
-          OR
-          <span className="flex-1 h-px bg-border" />
-        </div>
+        {error && (
+          <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive font-mono text-xs">
+            {error}
+          </div>
+        )}
 
         <TerminalField
-          label="email"
-          type="email"
+          label="email or handle"
+          type="text"
           required
-          placeholder="you@domain.dev"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@domain.dev or handle"
+          value={loginId}
+          onChange={(e) => setLoginId(e.target.value.replace(/\s+/g, ""))}
         />
         <TerminalField
           label="password"
@@ -71,16 +106,11 @@ function LoginPage() {
 
         <button
           type="submit"
-          className="w-full h-10 bg-neon text-background font-mono font-bold text-sm hover:shadow-glow-neon transition-shadow"
+          disabled={isLoading}
+          className="w-full h-10 bg-neon text-background font-mono font-bold text-sm hover:shadow-glow-neon transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          $ login --execute
+          {isLoading ? "$ processing..." : "$ login --execute"}
         </button>
-
-        <div className="text-center">
-          <Link to="/dashboard" className="font-mono text-[11px] text-muted-foreground hover:text-neon">
-            // skip auth → try dashboard
-          </Link>
-        </div>
       </form>
     </AuthShell>
   );

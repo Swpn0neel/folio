@@ -171,6 +171,7 @@
   .shadow-brutal-magenta { box-shadow: var(--shadow-brutal-magenta); }
   .shadow-brutal-cyan { box-shadow: var(--shadow-brutal-cyan); }
   .shadow-brutal-amber { box-shadow: var(--shadow-brutal-amber); }
+  .shadow-brutal-destructive { box-shadow: 6px 6px 0 0 var(--destructive); }
   .hover-feature-shadow:hover { box-shadow: var(--shadow-feature-hover); }
   .text-neon { color: var(--neon); }
   .text-magenta { color: var(--magenta); }

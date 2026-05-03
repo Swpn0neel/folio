@@ -3,7 +3,7 @@ import { Blocks, MoveVertical, Globe2, Terminal, Eye, Rocket } from "lucide-reac
 const features = [
   { icon: Blocks, key: "modular", title: "modular sections", desc: "bio · projects · blogs · experience · achievements · socials. toggle what matters.", color: "neon" },
   { icon: MoveVertical, key: "reorder", title: "drag to reorder", desc: "lead with blogs. or projects. or just a killer bio. your story, your stack order.", color: "magenta" },
-  { icon: Globe2, key: "handle", title: "your own handle", desc: "folio.dev/u/yourname. instant. shareable. yours.", color: "cyan" },
+  { icon: Globe2, key: "handle", title: "your own handle", desc: "folio.vercel.app/u/yourname. instant. shareable. yours.", color: "cyan" },
   { icon: Terminal, key: "engineer", title: "made for engineers", desc: "mono everything. github + rss imports. syntax-aware project cards.", color: "amber" },
   { icon: Eye, key: "preview", title: "live preview", desc: "wysiwyg. every keystroke renders exactly what visitors will see.", color: "violet" },
   { icon: Rocket, key: "ship", title: "ship instantly", desc: "no deploys. no dns. save → live worldwide on the edge.", color: "neon" },

@@ -97,6 +97,30 @@ const socialIcon = (label: string) => {
   return Link2;
 };
 
+function FormatText({ text, className }: { text: string; className: string }) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  
+  return (
+    <div className={className}>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        const isBullet = trimmed.startsWith("- ") || trimmed.startsWith("* ");
+        if (isBullet) {
+          const content = trimmed.substring(2);
+          return (
+            <div key={i} className="flex gap-2 items-start mt-1 first:mt-0">
+              <span className="shrink-0 opacity-70 mt-1 select-none text-[10px]">•</span>
+              <span className="flex-1">{content}</span>
+            </div>
+          );
+        }
+        return <p key={i} className={trimmed === "" ? "h-2" : ""}>{line}</p>;
+      })}
+    </div>
+  );
+}
+
 function initials(name: string) {
   if (!name) return "?";
   return name
@@ -116,9 +140,7 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
     case "bio":
       return portfolio.bio ? (
         <Block icon={Fingerprint} label="about" accentCss={accentCss}>
-          <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
-            {portfolio.bio}
-          </p>
+          <FormatText text={portfolio.bio} className="text-base text-muted-foreground leading-relaxed" />
         </Block>
       ) : null;
     case "socials":
@@ -126,15 +148,17 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
     case "projects":
       return portfolio.projects?.length ? (
         <Block icon={FolderGit2} label="projects" accentCss={accentCss}>
-          {portfolio.projects.map((pr) => (
-            <Item
-              key={pr.id}
-              title={pr.name}
-              meta={pr.tech}
-              desc={pr.description}
-              url={pr.url}
-            />
-          ))}
+          <div className="grid grid-cols-1 items-stretch md:grid-cols-2 gap-4">
+            {portfolio.projects.map((pr) => (
+              <Item
+                key={pr.id}
+                title={pr.name}
+                meta={pr.tech}
+                desc={pr.description}
+                url={pr.url}
+              />
+            ))}
+          </div>
         </Block>
       ) : null;
     case "blogs":
@@ -221,7 +245,7 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
         <span className="h-3 w-3 bg-neon" />
       </div>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[180px] sm:max-w-md border border-border bg-background px-3 py-0.5 text-xs font-mono text-muted-foreground text-center truncate">
-        <span className="text-neon">https://</span>folio.dev/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
+        <span className="text-neon">https://</span>folio.vercel.app/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
       </div>
     </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -244,7 +268,7 @@ function CustomSectionItems({
 
   if (template === "linkCards") {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 items-stretch sm:grid-cols-2 gap-3">
         {section.items.map((item) => (
           <LinkedCard key={item.id} item={item} accentCss={accentCss} />
         ))}
@@ -264,7 +288,7 @@ function CustomSectionItems({
 
   if (template === "gallery") {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 items-stretch sm:grid-cols-2 gap-3">
         {section.items.map((item) => (
           <GalleryItem key={item.id} item={item} accentCss={accentCss} />
         ))}
@@ -274,7 +298,7 @@ function CustomSectionItems({
 
   if (template === "stats") {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 items-stretch sm:grid-cols-2 gap-3">
         {section.items.map((item) => (
           <StatItem key={item.id} item={item} accentCss={accentCss} />
         ))}
@@ -286,9 +310,7 @@ function CustomSectionItems({
     return (
       <div className="flex flex-col gap-4">
         {section.items.map((item) => (
-          <p key={item.id} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-2xl">
-            {item.description}
-          </p>
+          <FormatText key={item.id} text={item.description || ""} className="text-sm text-muted-foreground leading-relaxed" />
         ))}
       </div>
     );
@@ -414,8 +436,8 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
     title: "font-sans text-4xl md:text-6xl font-bold tracking-normal leading-tight text-slate-950",
     eyebrow: "text-sm font-bold uppercase tracking-widest text-amber-700",
     muted: "text-slate-600",
-    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
-    section: "grid gap-4 md:grid-cols-[160px_minmax(0,1fr)]",
+    sectionGrid: "mt-2 flex flex-col",
+    section: "grid gap-4 md:grid-cols-[160px_minmax(0,1fr)] border-b border-slate-300 py-10",
     sectionTitle: "font-sans text-sm font-bold uppercase tracking-widest text-slate-950",
     item: "border-t border-slate-300 py-4 first:border-t-0 first:pt-0",
     simpleItem: "border-l-2 py-1 pl-4",
@@ -437,7 +459,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
     title: "font-sans text-4xl md:text-6xl font-black tracking-normal leading-none text-white",
     eyebrow: "text-sm font-bold uppercase tracking-widest text-sky-300",
     muted: "text-zinc-300",
-    sectionGrid: "mt-10 grid grid-cols-1 gap-8 md:grid-cols-2",
+    sectionGrid: "mt-10 grid grid-cols-1 gap-8",
     section: "border border-white/10 bg-white/[0.06] p-5 backdrop-blur",
     sectionTitle: "font-sans text-base font-black uppercase tracking-widest text-white",
     item: "border border-white/10 bg-black/20 p-4 transition-colors hover:border-rose-400/70",
@@ -498,7 +520,7 @@ function ThemedPortfolioRenderer({
           <span className="h-3 w-3 rounded-full bg-[#28c840]" />
         </div>
         <div className="absolute left-1/2 top-1/2 w-full max-w-[180px] -translate-x-1/2 -translate-y-1/2 truncate px-3 text-center text-xs">
-          folio.dev/u/{portfolio.handle || "you"}
+          folio.vercel.app/u/{portfolio.handle || "you"}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">{page}</div>
@@ -513,8 +535,8 @@ function ThemedProfile({ p, view, accentCss }: { p: Portfolio; view: ThemeView; 
       <ThemedAvatar p={p} view={view} accentCss={accentCss} />
       <div className="min-w-0">
         {showHandle && <p className={view.eyebrow} style={{ color: accentCss }}>@{p.handle || "you"}</p>}
-        <h1 className={`${view.title} mt-3 wrap-break-words`}>{p.fullName || "Your Name"}<span style={{ color: accentCss }}>.</span></h1>
-        {p.tagline && <p className={`${view.muted} mt-4 max-w-2xl text-base md:text-lg leading-relaxed`}>{p.tagline}</p>}
+        <h1 className={`${view.title} mt-3 wrap-break-words`}>{p.fullName}<span style={{ color: accentCss }}>.</span></h1>
+        {p.tagline && <p className={`${view.muted} mt-4 text-base md:text-lg leading-relaxed`}>{p.tagline}</p>}
       </div>
     </section>
   );
@@ -552,7 +574,6 @@ function ThemedSection({ id, portfolio, view }: { id: SectionId; portfolio: Port
   const custom = id.startsWith("custom:")
     ? (portfolio.customSections ?? []).find((section) => section.id === id)
     : null;
-  const studioWideCustom = view.id === "studio" && custom && ["linkCards", "gallery", "stats"].includes(custom.template ?? "simple");
   const label = custom?.title || (
     id === "bio" ? "about" :
     id === "socials" ? "links" :
@@ -566,7 +587,7 @@ function ThemedSection({ id, portfolio, view }: { id: SectionId; portfolio: Port
 
   return (
     <section
-      className={`${view.section} ${studioWideCustom ? "md:col-span-2" : ""}`}
+      className={view.section}
       style={{ ["--section-accent" as string]: accentCss }}
     >
       <div className="mb-4 flex items-center gap-2">
@@ -586,7 +607,7 @@ function renderThemedSectionContent(
   custom?: CustomSection,
 ) {
   if (id === "bio") {
-    return portfolio.bio ? <p className={`${view.muted} text-base leading-relaxed whitespace-pre-line`}>{portfolio.bio}</p> : null;
+    return portfolio.bio ? <FormatText text={portfolio.bio} className={`${view.muted} text-base leading-relaxed`} /> : null;
   }
   if (id === "socials") {
     if (!portfolio.socials?.length) return null;
@@ -616,11 +637,15 @@ function renderThemedSectionContent(
     );
   }
   if (id === "projects") {
-    return portfolio.projects?.length
-      ? portfolio.projects.map((project) => (
+    if (!portfolio.projects?.length) return null;
+    const isEditorial = view.id === "editorial";
+    return (
+      <div className={`grid grid-cols-1 items-stretch gap-4 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
+        {portfolio.projects.map((project) => (
           <ThemedItem key={project.id} view={view} accentCss={accentCss} title={project.name} meta={project.tech} desc={project.description} url={project.url} />
-        ))
-      : null;
+        ))}
+      </div>
+    );
   }
   if (id === "blogs") {
     return portfolio.blogs?.length
@@ -676,7 +701,7 @@ function ThemedCustomItems({
   if (template === "linkCards") {
     const isEditorial = view.id === "editorial";
     return (
-      <div className={`grid grid-cols-1 gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
+      <div className={`grid grid-cols-1 items-stretch gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
         ))}
@@ -686,8 +711,9 @@ function ThemedCustomItems({
 
   if (template === "gallery" || template === "stats") {
     const isEditorial = view.id === "editorial";
+    const useTwoCols = template === "gallery" || !isEditorial;
     return (
-      <div className={`grid grid-cols-1 gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
+      <div className={`grid grid-cols-1 items-stretch gap-3 ${useTwoCols ? "sm:grid-cols-2" : ""}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
         ))}
@@ -699,9 +725,7 @@ function ThemedCustomItems({
     return (
       <div className="flex flex-col gap-4">
         {section.items.map((item) => (
-          <p key={item.id} className={`${view.muted} text-base leading-relaxed whitespace-pre-line`}>
-            {item.description}
-          </p>
+          <FormatText key={item.id} text={item.description || ""} className={`${view.muted} text-base leading-relaxed`} />
         ))}
       </div>
     );
@@ -729,11 +753,17 @@ function ThemedCustomItem({
 }) {
   if (template === "stats") {
     return (
-      <a href={item.link || undefined} target={item.link ? "_blank" : undefined} rel={item.link ? "noreferrer noopener" : undefined} className={view.customCard} style={{ borderColor: accentCss }}>
+      <a
+        href={item.link || undefined}
+        target={item.link ? "_blank" : undefined}
+        rel={item.link ? "noreferrer noopener" : undefined}
+        className={`${view.customCard} flex h-full flex-col`}
+        style={{ borderColor: accentCss }}
+      >
         <p className="text-4xl font-bold" style={{ color: accentCss }}>{item.value || "0"}</p>
         <p className="mt-1 font-semibold text-base">{item.title || "metric"}</p>
         {(item.meta ?? item.subheading) && <p className={`${view.muted} mt-1 text-sm`}>{item.meta ?? item.subheading}</p>}
-        {item.description && <p className={`${view.muted} mt-2 text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
+        {item.description && <FormatText text={item.description} className={`${view.muted} mt-2 flex-1 text-base leading-relaxed`} />}
         {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
       </a>
     );
@@ -741,11 +771,19 @@ function ThemedCustomItem({
 
   if (template === "gallery") {
     return (
-      <a href={item.link || undefined} target={item.link ? "_blank" : undefined} rel={item.link ? "noreferrer noopener" : undefined} className={`${view.customCard} block overflow-hidden`} style={{ borderColor: accentCss }}>
+      <a
+        href={item.link || undefined}
+        target={item.link ? "_blank" : undefined}
+        rel={item.link ? "noreferrer noopener" : undefined}
+        className={`${view.customCard} flex h-full flex-col overflow-hidden`}
+        style={{ borderColor: accentCss }}
+      >
         {item.imageUrl && <img src={item.imageUrl} alt={item.title || "gallery item"} className={`${view.galleryImage} mb-3 aspect-video w-full object-cover`} />}
-        <p className="wrap-break-words text-base font-semibold">{item.title || "untitled"}</p>
-        {item.description && <p className={`${view.muted} mt-2 wrap-break-words text-base leading-relaxed whitespace-pre-line`}>{item.description}</p>}
-        {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
+        <div className="flex flex-1 flex-col">
+          <p className="wrap-break-words text-base font-semibold">{item.title || "untitled"}</p>
+          {item.description && <FormatText text={item.description} className={`${view.muted} mt-2 flex-1 wrap-break-words text-base leading-relaxed`} />}
+          {item.link && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{item.link}</p>}
+        </div>
       </a>
     );
   }
@@ -760,7 +798,7 @@ function ThemedCustomItem({
   }
 
   return (
-    <div className={view.simpleItem} style={{ borderColor: accentCss }}>
+    <div className={`${view.simpleItem} h-full`} style={{ borderColor: accentCss }}>
       <ThemedItem
         view={view}
         accentCss={accentCss}
@@ -792,7 +830,7 @@ function ThemedItem({
   bare?: boolean;
 }) {
   const content = (
-    <>
+    <div className="flex h-full flex-col">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="wrap-break-words text-base font-semibold">{title}</p>
@@ -803,9 +841,9 @@ function ThemedItem({
           return <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-70" style={{ color: accentCss }} />;
         })()}
       </div>
-      {desc && <p className={`${view.muted} mt-2 wrap-break-words text-base leading-relaxed whitespace-pre-line`}>{desc}</p>}
+      {desc && <FormatText text={desc} className={`${view.muted} mt-2 flex-1 wrap-break-words text-base leading-relaxed`} />}
       {url && <p className="mt-3 truncate text-sm" style={{ color: accentCss }}>{url}</p>}
-    </>
+    </div>
   );
 
   if (bare) {
@@ -819,44 +857,56 @@ function ThemedItem({
 
   if (url) {
     return (
-      <a href={url} target="_blank" rel="noreferrer noopener" className={`${view.item} ${view.link}`} style={{ borderColor: accentCss }}>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className={`${view.item} ${view.link} flex h-full flex-col`}
+        style={{ borderColor: accentCss }}
+      >
         {content}
       </a>
     );
   }
 
-  return <div className={view.item} style={{ borderColor: accentCss }}>{content}</div>;
+  return (
+    <div className={`${view.item} flex h-full flex-col`} style={{ borderColor: accentCss }}>
+      {content}
+    </div>
+  );
 }
 
 function LinkedCard({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   const Wrapper = item.link
     ? ({ children }: { children: React.ReactNode }) => (
-        <a href={item.link} target="_blank" rel="noreferrer noopener" className="group block border border-border bg-background p-3 hover:bg-secondary/50 transition-colors">
+        <a href={item.link} target="_blank" rel="noreferrer noopener" className="group flex h-full flex-col border border-border bg-background p-3 hover:bg-secondary/50 transition-colors">
           {children}
         </a>
       )
     : ({ children }: { children: React.ReactNode }) => (
-        <div className="group border border-border bg-background p-3 hover:bg-secondary/50 transition-colors">
+        <div className="group flex h-full flex-col border border-border bg-background p-3 hover:bg-secondary/50 transition-colors">
           {children}
         </div>
       );
 
   return (
     <Wrapper>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-mono text-base font-bold wrap-break-words">{item.title || "untitled link"}</p>
-          {(item.meta ?? item.subheading) && (
-            <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
-          )}
+      <div className="flex flex-1 flex-col">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-base font-bold wrap-break-words">{item.title || "untitled link"}</p>
+            {(item.meta ?? item.subheading) && (
+              <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
+            )}
+          </div>
+          {item.link && (() => {
+            const Icon = socialIcon(item.title || item.meta || "");
+            return <Icon className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />;
+          })()}
         </div>
-        {item.link && (() => {
-          const Icon = socialIcon(item.title || item.meta || "");
-          return <Icon className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />;
-        })()}
+        {item.description && <FormatText text={item.description} className="mt-2 flex-1 wrap-break-words text-sm text-muted-foreground" />}
+        {item.link && <p className="mt-3 truncate font-mono text-sm" style={{ color: accentCss }}>{item.link}</p>}
       </div>
-      {item.description && <p className="text-sm text-muted-foreground mt-2 wrap-break-words whitespace-pre-line">{item.description}</p>}
-      {item.link && <p className="font-mono text-sm mt-3 truncate" style={{ color: accentCss }}>{item.link}</p>}
     </Wrapper>
   );
 }
@@ -877,7 +927,7 @@ function TimelineItem({ item, accentCss }: { item: CustomSectionItem; accentCss:
 
 function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   const content = (
-    <div className="group border border-border bg-background hover:bg-secondary/50 transition-colors overflow-hidden">
+    <div className="group flex h-full flex-col overflow-hidden border border-border bg-background transition-colors hover:bg-secondary/50">
       {item.imageUrl ? (
         <img src={item.imageUrl} alt={item.title || "gallery item"} className="w-full aspect-video object-cover border-b border-border" />
       ) : (
@@ -885,12 +935,12 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
           image
         </div>
       )}
-      <div className="p-3">
+      <div className="flex flex-1 flex-col p-3">
         <div className="flex items-start justify-between gap-3">
           <p className="font-mono text-sm font-bold wrap-break-words">{item.title || "untitled"}</p>
           {item.link && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
         </div>
-        {item.description && <p className="text-xs text-muted-foreground mt-1 wrap-break-words whitespace-pre-line">{item.description}</p>}
+        {item.description && <FormatText text={item.description} className="mt-1 flex-1 wrap-break-words text-xs text-muted-foreground" />}
       </div>
     </div>
   );
@@ -898,7 +948,7 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
   if (!item.link) return content;
 
   return (
-    <a href={item.link} target="_blank" rel="noreferrer noopener" style={{ ['--gallery-accent' as string]: accentCss }}>
+    <a href={item.link} target="_blank" rel="noreferrer noopener" className="block h-full" style={{ ['--gallery-accent' as string]: accentCss }}>
       {content}
     </a>
   );
@@ -906,7 +956,7 @@ function GalleryItem({ item, accentCss }: { item: CustomSectionItem; accentCss: 
 
 function StatItem({ item, accentCss }: { item: CustomSectionItem; accentCss: string }) {
   const content = (
-    <div className="group border border-border bg-background p-4 hover:bg-secondary/50 transition-colors">
+    <div className="group flex h-full flex-col border border-border bg-background p-4 transition-colors hover:bg-secondary/50">
       <p className="font-mono text-4xl font-bold wrap-break-words" style={{ color: accentCss }}>
         {item.value || "0"}
       </p>
@@ -914,14 +964,14 @@ function StatItem({ item, accentCss }: { item: CustomSectionItem; accentCss: str
       {(item.meta ?? item.subheading) && (
         <p className="text-sm font-mono text-muted-foreground mt-0.5">{item.meta ?? item.subheading}</p>
       )}
-      {item.description && <p className="text-sm text-muted-foreground mt-2 wrap-break-words whitespace-pre-line">{item.description}</p>}
+      {item.description && <FormatText text={item.description} className="mt-2 flex-1 wrap-break-words text-sm text-muted-foreground" />}
     </div>
   );
 
   if (!item.link) return content;
 
   return (
-    <a href={item.link} target="_blank" rel="noreferrer noopener">
+    <a href={item.link} target="_blank" rel="noreferrer noopener" className="block h-full">
       {content}
     </a>
   );
@@ -949,7 +999,7 @@ function ProfileBlock({ p, accentCss }: { p: Portfolio; accentCss?: string }) {
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <h3 className="font-mono text-3xl font-bold wrap-break-words md:text-4xl">
-          {p.fullName || "your_name"}
+          {p.fullName}
           <span className="animate-blink" style={{ color: accent }}>_</span>
         </h3>
         {(showHandle || p.tagline) && (
@@ -1026,22 +1076,22 @@ function Block({
 function Item({ title, meta, desc, url }: { title: string; meta?: string; desc?: string; url?: string }) {
   const Wrapper = url
     ? ({ children }: { children: React.ReactNode }) => (
-        <a href={url} target="_blank" rel="noreferrer noopener" className="group flex items-start justify-between gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
+        <a href={url} target="_blank" rel="noreferrer noopener" className="group flex h-full justify-between gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
           {children}
         </a>
       )
     : ({ children }: { children: React.ReactNode }) => (
-        <div className="group flex items-start justify-between gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
+        <div className="group flex h-full justify-between gap-3 p-2 -mx-2 hover:bg-secondary/50 transition-colors">
           {children}
         </div>
       );
 
   return (
     <Wrapper>
-      <div className="min-w-0">
+      <div className="flex h-full min-w-0 flex-1 flex-col">
         <p className="font-mono text-base font-medium wrap-break-words">{title}</p>
         {meta && <p className="text-sm font-mono text-muted-foreground mt-0.5">{meta}</p>}
-        {desc && <p className="text-sm text-muted-foreground mt-1 wrap-break-words whitespace-pre-line">{desc}</p>}
+        {desc && <FormatText text={desc} className="mt-1 flex-1 wrap-break-words text-sm text-muted-foreground" />}
       </div>
       {url && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-neon transition-colors mt-1 shrink-0" />}
     </Wrapper>

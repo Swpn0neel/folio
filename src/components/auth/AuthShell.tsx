@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { TerminalSquare } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function AuthShell({
   title,
@@ -17,9 +18,9 @@ export function AuthShell({
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border">
         <div className="mx-auto max-w-6xl px-6 h-14 flex items-center">
-          <Link to="/" className="flex items-center gap-2 font-mono font-bold">
-            <span>~/folio</span>
-            <span className="text-neon animate-blink">_</span>
+          <Link to="/" className="flex items-center gap-2.5 font-mono font-bold group leading-none">
+            <Logo className="h-5 w-5 group-hover:text-neon transition-colors" />
+            <span className="text-foreground">~/folio</span>
           </Link>
         </div>
       </header>

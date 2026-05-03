@@ -39,14 +39,10 @@ export function Hero() {
   const claim = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = handle.replace(/[^a-zA-Z0-9_-]/g, "").toLowerCase();
-    if (clean) {
-      try {
-        localStorage.setItem("folio:handle", clean);
-      } catch {
-        // ignore
-      }
-    }
-    navigate({ to: "/dashboard" });
+    navigate({ 
+      to: "/signup",
+      search: clean ? { handle: clean } : undefined 
+    });
   };
 
   return (
@@ -80,7 +76,7 @@ export function Hero() {
           <span className="text-amber">{"::"} </span>
           A brutalist portfolio builder for devs who'd rather ship than design.
           Toggle sections, reorder them, and also get a public link at{" "}
-          <span className="text-neon">folio.dev/u/&lt;you&gt;</span>.
+          <span className="text-neon">folio.vercel.app/u/&lt;you&gt;</span>.
         </p>
 
         {/* Terminal handle input */}
@@ -96,7 +92,7 @@ export function Hero() {
               <span className="text-neon">user@folio</span>:<span className="text-cyan">~</span>$ claim --handle
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-magenta shrink-0">folio.dev/u/</span>
+              <span className="text-magenta shrink-0">folio.vercel.app/u/</span>
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
@@ -111,9 +107,6 @@ export function Hero() {
         </form>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-mono">
-          <Link to="/signup" className="inline-flex items-center gap-2 h-9 px-4 border border-border hover:border-neon hover:text-neon transition-colors">
-            <Github className="h-4 w-4" /> auth --provider github
-          </Link>
           <span className="text-muted-foreground">
             <span className="text-neon">●</span> 100% free  
             <span className="mx-2">·</span>

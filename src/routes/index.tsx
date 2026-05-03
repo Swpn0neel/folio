@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
@@ -10,13 +12,13 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "folio — brutalist portfolios for engineers" },
+      { title: "Folio" },
       {
         name: "description",
         content:
-          "A terminal-flavored portfolio builder for developers. Toggle sections, drag to reorder, get folio.dev/u/yourhandle. Free forever.",
+          "A terminal-flavored portfolio builder for developers. Toggle sections, drag to reorder, get folio.vercel.app/u/yourhandle. Free forever.",
       },
-      { property: "og:title", content: "folio — brutalist portfolios for engineers" },
+      { property: "og:title", content: "Folio" },
       { property: "og:description", content: "ship a dev portfolio in under 60s. free forever." },
     ],
   }),
@@ -24,6 +26,15 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { session, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && session) {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [session, isLoading, navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
