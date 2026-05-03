@@ -213,7 +213,7 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
   if (!framed) return inner;
 
   return (
-    <div className="border border-border bg-card shadow-brutal flex flex-col h-full overflow-hidden">
+    <div className="rounded-xl border border-border bg-card shadow-brutal flex flex-col h-full overflow-hidden">
     <div className="relative flex items-center h-10 px-4 border-b border-border bg-secondary shrink-0 z-10">
       <div className="flex items-center gap-2 shrink-0">
         <span className="h-3 w-3 bg-destructive" />
@@ -337,7 +337,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   vercel: {
     id: "vercel",
     shell: "bg-white text-[#171717]",
-    frame: "border border-[#ebebeb] bg-white shadow-[rgba(0,0,0,0.08)_0px_0px_0px_1px,rgba(0,0,0,0.04)_0px_2px_2px]",
+    frame: "rounded-xl border border-[#ebebeb] bg-white shadow-[rgba(0,0,0,0.08)_0px_0px_0px_1px,rgba(0,0,0,0.04)_0px_2px_2px]",
     frameBar: "border-b border-[#ebebeb] bg-[#fafafa] text-[#666666]",
     page: "bg-white px-6 py-7 md:px-10 md:py-10",
     header: "flex flex-col gap-8 pb-8 sm:flex-row sm:items-center",
@@ -360,7 +360,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   vercelDark: {
     id: "vercelDark",
     shell: "bg-[#000000] text-[#fafafa]",
-    frame: "border border-[#171717] bg-[#000000] shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
+    frame: "rounded-xl border border-[#171717] bg-[#000000] shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
     frameBar: "border-b border-[#171717] bg-[#0a0a0a] text-[#808080]",
     page: "bg-[#000000] px-6 py-7 md:px-10 md:py-10",
     header: "flex flex-col gap-8 pb-8 sm:flex-row sm:items-center",
@@ -383,7 +383,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   material: {
     id: "material",
     shell: "bg-[#fbf7ff] text-[#1f1b24]",
-    frame: "rounded-[28px] border border-[#e7dff5] bg-[#fbf7ff] shadow-[0_24px_70px_rgba(103,80,164,0.18)] overflow-hidden",
+    frame: "rounded-xl border border-[#e7dff5] bg-[#fbf7ff] shadow-[0_24px_70px_rgba(103,80,164,0.18)] overflow-hidden",
     frameBar: "border-b border-[#e7dff5] bg-[#f1e8ff] text-[#625b71]",
     page: "bg-[linear-gradient(135deg,#fbf7ff_0%,#fff7ed_48%,#effdf7_100%)] px-6 py-7 md:px-10 md:py-10",
     header: "flex flex-col gap-8 sm:flex-row sm:items-center",
@@ -406,7 +406,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   editorial: {
     id: "editorial",
     shell: "bg-[#f8fafc] text-slate-950",
-    frame: "border border-slate-300 bg-[#f8fafc] shadow-[0_28px_80px_rgba(15,23,42,0.12)]",
+    frame: "rounded-xl border border-slate-300 bg-[#f8fafc] shadow-[0_28px_80px_rgba(15,23,42,0.12)]",
     frameBar: "border-b border-slate-300 bg-[#f1f5f9] text-slate-500",
     page: "bg-[#f8fafc] px-6 py-8 md:px-12 md:py-12",
     header: "flex flex-col gap-8 border-b-2 border-slate-950 pb-8 sm:flex-row sm:items-center",
@@ -429,7 +429,7 @@ const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView> = {
   studio: {
     id: "studio",
     shell: "bg-[#111111] text-white",
-    frame: "border border-white/10 bg-[#111111] shadow-[0_28px_90px_rgba(244,63,94,0.18)]",
+    frame: "rounded-xl border border-white/10 bg-[#111111] shadow-[0_28px_90px_rgba(244,63,94,0.18)]",
     frameBar: "border-b border-white/10 bg-[#18181b] text-zinc-400",
     page: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.28),transparent_34%),linear-gradient(135deg,#111111,#171717_55%,#0f172a)] px-6 py-7 md:px-10 md:py-10",
     header: "flex flex-col gap-8 sm:flex-row sm:items-center",

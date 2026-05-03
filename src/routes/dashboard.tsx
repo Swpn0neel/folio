@@ -16,7 +16,7 @@ import {
   getCustomSectionTemplateMeta,
   type PortfolioThemeId,
 } from "@/lib/portfolio";
-import { Field, TextField } from "@/components/dashboard/Field";
+import { Field, TextField, ImageUploadField } from "@/components/dashboard/Field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ListEditor } from "@/components/dashboard/ListEditor";
 import { colorToCss, SECTION_COLOR_GROUPS, SECTION_COLORS, SectionsManager } from "@/components/dashboard/SectionsManager";
@@ -326,11 +326,11 @@ function Dashboard() {
                 onChange={(e) => update("fullName", e.target.value)}
                 placeholder="Alex Rivera"
               />
-              <Field
-                label="avatar url"
-                hint="paste an image URL"
+              <ImageUploadField
+                label="avatar"
+                hint="upload or paste URL"
                 value={portfolio.avatarUrl}
-                onChange={(e) => update("avatarUrl", e.target.value)}
+                onChange={(val) => update("avatarUrl", val)}
                 placeholder="https://..."
               />
             </div>
@@ -902,10 +902,11 @@ function CustomItemFields({
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. brand refresh"
         />
-        <Field
-          label="image url"
+        <ImageUploadField
+          label="image"
+          hint="upload or paste URL"
           value={item.imageUrl ?? ""}
-          onChange={(e) => onChange({ imageUrl: e.target.value })}
+          onChange={(val) => onChange({ imageUrl: val })}
           placeholder="https://..."
         />
         <div className="sm:col-span-2">

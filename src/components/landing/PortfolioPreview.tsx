@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
+import { Palette, Sparkles } from "lucide-react";
 import avatar from "@/assets/avatar-sample.jpg";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
-import type { Portfolio } from "@/lib/portfolio";
+import { PORTFOLIO_THEMES, type Portfolio, type PortfolioThemeId } from "@/lib/portfolio";
 
-const MOCK_PORTFOLIO: Portfolio = {
+const MOCK_PORTFOLIO: Omit<Portfolio, "theme"> = {
   handle: "alex",
   showHandle: true,
   fullName: "Alex Rivera",
@@ -63,12 +67,20 @@ const MOCK_PORTFOLIO: Portfolio = {
 };
 
 export function PortfolioPreview() {
+  const [theme, setTheme] = useState<PortfolioThemeId>("terminal");
+
+  const previewPortfolio: Portfolio = {
+    ...(MOCK_PORTFOLIO as Portfolio),
+    theme,
+  };
+
   return (
     <section id="preview" className="relative py-24 border-b border-border">
       <div className="absolute inset-0 -z-10 bg-grid opacity-30" />
 
       <div className="mx-auto max-w-6xl px-6">
-        <div className="max-w-2xl mb-12">
+        {/* Header Section */}
+        <div className="max-w-2xl mb-8">
           <p className="font-mono text-xs text-muted-foreground mb-3">
             <span className="text-amber">/**</span> preview <span className="text-amber">*/</span>
           </p>
@@ -80,28 +92,43 @@ export function PortfolioPreview() {
           </p>
         </div>
 
-        {/* Browser/IDE chrome */}
-        <div className="border border-border bg-card shadow-brutal">
-          <div className="relative flex items-center h-10 px-4 border-b border-border bg-secondary shrink-0 z-10">
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="h-3 w-3 bg-destructive" />
-              <span className="h-3 w-3 bg-amber" />
-              <span className="h-3 w-3 bg-neon" />
-            </div>
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[180px] sm:max-w-md border border-border bg-background px-3 py-0.5 text-xs font-mono text-muted-foreground text-center truncate">
-              <span className="text-neon">https://</span>folio.dev/u/<span className="text-magenta">alex</span>
-            </div>
-            <div className="ml-auto shrink-0 hidden sm:block">
-              <span className="text-[10px] font-mono text-muted-foreground">200 OK · 12ms</span>
-            </div>
+        {/* Theme Selector Row */}
+        <div className="w-full mb-8 overflow-hidden">
+          <div className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-3">
+            <Palette className="h-3.5 w-3.5 text-magenta" />
+            <span>select_theme()</span>
           </div>
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide pb-2">
+            {PORTFOLIO_THEMES.map((t) => {
+              const isActive = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  className={`relative px-4 py-2 font-mono text-xs transition-all duration-300 border group overflow-hidden shrink-0 ${
+                    isActive
+                      ? "border-neon text-neon bg-neon/10 shadow-[0_0_15px_rgba(var(--color-neon),0.2)]"
+                      : "border-border bg-background text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
+                  }`}
+                >
+                  {isActive && (
+                    <span className="absolute inset-0 bg-linear-to-r from-transparent via-neon/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {isActive && <Sparkles className="h-3 w-3" />}
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          <div className="max-h-[600px] overflow-y-auto scrollbar-hide bg-background/50">
-            <PortfolioRenderer portfolio={MOCK_PORTFOLIO} framed={false} />
-          </div>
+        {/* Live Preview Container */}
+        <div className="h-[750px] w-full transition-all duration-500 ease-in-out">
+          <PortfolioRenderer portfolio={previewPortfolio} framed={true} />
         </div>
       </div>
     </section>
   );
 }
-

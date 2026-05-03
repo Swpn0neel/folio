@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { GripVertical, Eye, EyeOff, Trash2 } from "lucide-react";
+import { GripVertical, Eye, EyeOff, Trash2, Lock } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -20,13 +20,13 @@ import { CSS } from "@dnd-kit/utilities";
 import { uid } from "@/lib/portfolio";
 
 const INITIAL_SECTIONS = [
-  { id: "profile", name: "profile", desc: "name · avatar · tag", on: true, accent: "var(--neon)" },
-  { id: "bio", name: "bio", desc: "about you · in your words", on: true, accent: "var(--rose)" },
-  { id: "socials", name: "socials", desc: "github · x · linkedin · site", on: true, accent: "var(--cyan)" },
-  { id: "projects", name: "projects", desc: "what you've built", on: true, accent: "var(--neon)" },
-  { id: "blogs", name: "blogs", desc: "what you've written", on: true, accent: "var(--magenta)" },
-  { id: "experience", name: "experience", desc: "where you've worked", on: false, accent: "var(--indigo)" },
-  { id: "achievements", name: "achievements", desc: "talks · awards · milestones", on: true, accent: "var(--amber)" },
+  { id: "profile", name: "profile", desc: "name · avatar · tag", on: true, accent: "neon" },
+  { id: "bio", name: "bio", desc: "about you · in your words", on: true, accent: "rose" },
+  { id: "socials", name: "socials", desc: "github · x · linkedin · site", on: true, accent: "cyan" },
+  { id: "projects", name: "projects", desc: "what you've built", on: true, accent: "neon" },
+  { id: "blogs", name: "blogs", desc: "what you've written", on: true, accent: "magenta" },
+  { id: "experience", name: "experience", desc: "where you've worked", on: false, accent: "indigo" },
+  { id: "achievements", name: "achievements", desc: "talks · awards · milestones", on: true, accent: "amber" },
 ];
 
 export function SectionsShowcase() {
@@ -68,7 +68,6 @@ export function SectionsShowcase() {
     );
   };
 
-
   const removeSection = (id: string) => {
     setSections((prev) => prev.filter((s) => s.id !== id));
   };
@@ -83,13 +82,16 @@ export function SectionsShowcase() {
           name: t,
           desc: "0 items · custom section",
           on: true,
-          accent: "var(--neon)",
+          accent: "neon",
         },
       ]);
     }
     setNewTitle("");
     setAddingCustom(false);
   };
+
+  const profileSection = sections.find((s) => s.id === "profile");
+  const sortableSections = sections.filter((s) => s.id !== "profile");
 
   return (
     <section id="sections" className="py-24 border-b border-border">
@@ -108,14 +110,15 @@ export function SectionsShowcase() {
           <p className="mt-5 text-muted-foreground text-sm leading-relaxed">
             <span className="text-amber">// </span>
             want to lead with blogs and skip experience? done.
-            just projects and a bio? even better. folio adapts
-            to the story <span className="text-neon">you</span> want to tell.
+            need a custom section for your podcast? easy.
+            folio adapts to the story <span className="text-neon">you</span> want to tell.
           </p>
           <ul className="mt-8 space-y-2 font-mono text-sm">
             {[
               "every section is optional — show only what you love",
               "drag-and-drop reordering, persisted instantly",
-              "smart defaults so it always looks intentional",
+              "create custom sections for literally anything",
+              "pick unique accent colours for every section",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3">
                 <span className="text-neon shrink-0">▸</span>
@@ -134,32 +137,58 @@ export function SectionsShowcase() {
           </div>
           <div className="p-3 space-y-1 min-h-[360px]">
             {mounted ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sections.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {sections.map((s) => (
-                    <SortableItem
-                      key={s.id}
-                      section={s}
-                      onToggle={() => toggleSection(s.id)}
-                      onRemove={s.id.startsWith("custom:") ? () => removeSection(s.id) : undefined}
+              <>
+                {profileSection && (
+                  <div className="flex items-center gap-2 border border-border/40 bg-secondary/10 px-2 py-2 opacity-80 mb-2">
+                    <span className="text-muted-foreground/40 px-1" title="profile is locked at the top">
+                      <Lock className="h-3 w-3" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-sm">
+                        <span className="text-neon">$</span> {profileSection.name}
+                      </p>
+                      <p className="text-xs font-mono text-muted-foreground truncate">{profileSection.desc}</p>
+                    </div>
+                    <ColorPicker
+                      value={profileSection.accent}
+                      onChange={(color) => setSections(prev => prev.map(s => s.id === 'profile' ? { ...s, accent: color } : s))}
                     />
-                  ))}
-                </SortableContext>
-              </DndContext>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border border-neon/30 text-neon/60 bg-neon/5 cursor-default select-none">
+                      <Eye className="h-3 w-3" />
+                      always on
+                    </span>
+                  </div>
+                )}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={sortableSections.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {sortableSections.map((s) => (
+                      <SortableItem
+                        key={s.id}
+                        section={s}
+                        onToggle={() => toggleSection(s.id)}
+                        onColorChange={(color) => setSections(prev => prev.map(x => x.id === s.id ? { ...x, accent: color } : x))}
+                        onRemove={s.id.startsWith("custom:") ? () => removeSection(s.id) : undefined}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </>
             ) : (
               sections.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center gap-2 border border-transparent bg-background/50 px-2 py-2"
+                  className={`flex items-center gap-2 border border-transparent bg-background/50 px-2 py-2 ${s.id === "profile" ? "opacity-60" : ""}`}
                 >
-                  <GripVertical className="h-4 w-4 text-muted-foreground/60" />
+                  <span className="text-muted-foreground/60 px-1">
+                    {s.id === "profile" ? <Lock className="h-3 w-3" /> : <GripVertical className="h-4 w-4" />}
+                  </span>
                   <div className="flex-1 min-w-0">
                     <p className="font-mono text-sm">
                       <span className="text-neon">$</span> {s.name}
@@ -167,14 +196,16 @@ export function SectionsShowcase() {
                     <p className="text-xs font-mono text-muted-foreground truncate">{s.desc}</p>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border ${
-                      s.on
+                    className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border transition-colors ${
+                      s.id === "profile"
+                        ? "border-neon/30 text-neon/60 bg-neon/5"
+                        : s.on
                         ? "border-neon text-neon"
                         : "border-border text-muted-foreground"
                     }`}
                   >
                     {s.on ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                    {s.on ? "on" : "off"}
+                    {s.id === "profile" ? "always on" : (s.on ? "on" : "off")}
                   </span>
                 </div>
               ))
@@ -230,10 +261,12 @@ export function SectionsShowcase() {
 function SortableItem({
   section,
   onToggle,
+  onColorChange,
   onRemove,
 }: {
   section: (typeof INITIAL_SECTIONS)[0];
   onToggle: () => void;
+  onColorChange: (color: string) => void;
   onRemove?: () => void;
 }) {
   const {
@@ -246,7 +279,7 @@ function SortableItem({
   } = useSortable({ id: section.id });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 0,
   };
@@ -262,7 +295,7 @@ function SortableItem({
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-muted-foreground/60 hover:text-foreground transition-colors"
+        className="cursor-grab active:cursor-grabbing text-muted-foreground/60 hover:text-foreground transition-colors px-1"
         aria-label="Drag to reorder"
       >
         <GripVertical className="h-4 w-4" />
@@ -286,17 +319,19 @@ function SortableItem({
         </button>
       )}
 
-      {/* Static Color Swatch */}
+      {/* Dynamic Color Swatch */}
       <ColorPicker 
         value={section.accent} 
+        onChange={onColorChange}
       />
 
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onToggle();
         }}
-        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border transition-colors ${
+        className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 h-[22px] border transition-colors ${
           section.on
             ? "border-neon text-neon"
             : "border-border text-muted-foreground hover:border-foreground"
@@ -309,20 +344,37 @@ function SortableItem({
   );
 }
 
+const TERMINAL_COLORS = [
+  { key: "neon", label: "neon", css: "var(--neon)" },
+  { key: "cyan", label: "cyan", css: "var(--cyan)" },
+  { key: "magenta", label: "magenta", css: "var(--magenta)" },
+  { key: "amber", label: "amber", css: "var(--amber)" },
+  { key: "indigo", label: "indigo", css: "var(--indigo)" },
+  { key: "rose", label: "rose", css: "var(--rose)" },
+];
+
 function ColorPicker({
   value,
 }: {
   value: string;
+  onChange?: (color: string) => void;
 }) {
+  const activeCss = TERMINAL_COLORS.find(c => c.key === value)?.css || `var(--${value})`;
+
   return (
-    <div className="flex items-center gap-1 px-1.5 py-1 border border-border opacity-60 group-hover:opacity-100 transition-opacity">
-      <span
-        className="block h-2.5 w-2.5 rounded-full border border-white/10 shrink-0"
-        style={{ background: value }}
-      />
-      <svg className="h-2 w-2 text-muted-foreground" viewBox="0 0 8 8" fill="none">
-        <path d="M1.5 3L4 5.5L6.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
+    <div className="relative shrink-0">
+      <div
+        className="flex items-center gap-1 px-2 h-[22px] border border-border opacity-60 hover:opacity-100 transition-opacity"
+        title="section colour (customise in dashboard)"
+      >
+        <span
+          className="block h-2.5 w-2.5 rounded-full border border-white/10 shrink-0"
+          style={{ background: activeCss }}
+        />
+        <svg className="h-2 w-2 text-muted-foreground" viewBox="0 0 8 8" fill="none">
+          <path d="M1.5 3L4 5.5L6.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
     </div>
   );
 }
