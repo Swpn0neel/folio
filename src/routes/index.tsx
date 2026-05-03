@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A terminal-flavored portfolio builder for developers. Toggle sections, drag to reorder, get folio.vercel.app/u/yourhandle. Free forever.",
+          "A terminal-flavored portfolio builder for developers. Toggle sections, drag to reorder, get fo1io.vercel.app/u/yourhandle. Free forever.",
       },
       { property: "og:title", content: "Folio" },
       { property: "og:description", content: "ship a dev portfolio in under 60s. free forever." },

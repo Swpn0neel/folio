@@ -245,7 +245,7 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
         <span className="h-3 w-3 bg-neon" />
       </div>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[180px] sm:max-w-md border border-border bg-background px-3 py-0.5 text-xs font-mono text-muted-foreground text-center truncate">
-        <span className="text-neon">https://</span>folio.vercel.app/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
+        <span className="text-neon">https://</span>fo1io.vercel.app/u/<span className="text-magenta">{portfolio.handle || "you"}</span>
       </div>
     </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -520,7 +520,7 @@ function ThemedPortfolioRenderer({
           <span className="h-3 w-3 rounded-full bg-[#28c840]" />
         </div>
         <div className="absolute left-1/2 top-1/2 w-full max-w-[180px] -translate-x-1/2 -translate-y-1/2 truncate px-3 text-center text-xs">
-          folio.vercel.app/u/{portfolio.handle || "you"}
+          fo1io.vercel.app/u/{portfolio.handle || "you"}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-hide">{page}</div>

@@ -31,7 +31,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Folio — Beautiful portfolios for developers" },
-      { name: "description", content: "Build a stunning developer portfolio in minutes. Showcase your projects, blogs, and experience on your own folio.vercel.app/u/handle." },
+      { name: "description", content: "Build a stunning developer portfolio in minutes. Showcase your projects, blogs, and experience on your own fo1io.vercel.app/u/handle." },
       { name: "author", content: "Folio" },
       { property: "og:title", content: "Folio — Beautiful portfolios for developers" },
       { property: "og:description", content: "Build a stunning developer portfolio in minutes. Drag, drop, ship." },

@@ -107,7 +107,7 @@ function SignupPage() {
 
         <TerminalField
           label="handle"
-          prefix="folio.vercel.app/u/"
+          prefix="fo1io.vercel.app/u/"
           required
           pattern="[a-zA-Z0-9_-]+"
           placeholder="yourhandle"

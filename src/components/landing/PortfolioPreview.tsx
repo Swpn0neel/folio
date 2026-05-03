@@ -88,7 +88,7 @@ export function PortfolioPreview() {
             <span className="text-neon">render</span>(&lt;You/&gt;)
           </h2>
           <p className="mt-4 text-muted-foreground text-sm">
-            <span className="text-amber">// </span> what shows up at folio.vercel.app/u/alex
+            <span className="text-amber">// </span> what shows up at fo1io.vercel.app/u/alex
           </p>
         </div>
 

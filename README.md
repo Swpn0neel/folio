@@ -4,7 +4,7 @@ Folio is a state-of-the-art portfolio generation platform designed for developer
 
 ![Folio Preview](./public/landing.png)
 
-## ✨ Key Features
+## Key Features
 
 ### Advanced Theme System
 Folio comes with a set of meticulously crafted themes, each offering a distinct aesthetic:

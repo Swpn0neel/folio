@@ -76,7 +76,7 @@ export function Hero() {
           <span className="text-amber">{"::"} </span>
           A brutalist portfolio builder for devs who'd rather ship than design.
           Toggle sections, reorder them, and also get a public link at{" "}
-          <span className="text-neon">folio.vercel.app/u/&lt;you&gt;</span>.
+          <span className="text-neon">fo1io.vercel.app/u/&lt;you&gt;</span>.
         </p>
 
         {/* Terminal handle input */}
@@ -92,7 +92,7 @@ export function Hero() {
               <span className="text-neon">user@folio</span>:<span className="text-cyan">~</span>$ claim --handle
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-magenta shrink-0">folio.vercel.app/u/</span>
+              <span className="text-magenta shrink-0">fo1io.vercel.app/u/</span>
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
