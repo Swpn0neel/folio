@@ -41,12 +41,12 @@ export function Features() {
               >
                 {/* Corner Accent */}
                 <div className="absolute top-0 right-0 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="absolute top-2 right-2 w-full h-[1px] bg-[var(--tile-accent)]" />
-                  <div className="absolute top-2 right-2 w-[1px] h-full bg-[var(--tile-accent)]" />
+                  <div className="absolute top-2 right-2 w-full h-1px bg-(--tile-accent)" />
+                  <div className="absolute top-2 right-2 w-1px h-full bg-(--tile-accent)" />
                 </div>
 
                 <div className="flex items-center justify-between mb-6">
-                  <div className={`p-2 border border-transparent group-hover:border-[var(--tile-accent)] transition-colors duration-300`}>
+                  <div className={`p-2 border border-transparent group-hover:border-(--tile-accent) transition-colors duration-300`}>
                     <f.icon className={`h-6 w-6 ${c.text} transition-transform duration-300 group-hover:scale-110`} />
                   </div>
                   <span className="font-mono text-[10px] text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity">
@@ -63,7 +63,7 @@ export function Features() {
                 </p>
 
                 {/* Bottom decorative bar */}
-                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-[var(--tile-accent)] transition-all duration-500 group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-(--tile-accent) transition-all duration-500 group-hover:w-full" />
               </div>
             );
           })}
