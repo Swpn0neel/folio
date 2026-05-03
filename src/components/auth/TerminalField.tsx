@@ -30,7 +30,7 @@ export function TerminalField({
             className="ml-2 text-muted-foreground hover:text-neon transition-colors focus:outline-none"
             title={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
           </button>
         )}
       </div>
