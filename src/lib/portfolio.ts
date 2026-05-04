@@ -166,6 +166,8 @@ export function getSectionMeta(id: SectionId, customSections: CustomSection[]): 
 
 const STORAGE_KEY = "folio:portfolio";
 import { supabase } from "./supabase";
+import { PortfolioSchema } from "./schemas";
+import { uid } from "@/utils/id";
 
 function normalizeCustomItem(item: Partial<CustomSectionItem>): CustomSectionItem {
   const meta = item.meta ?? item.subheading ?? "";
@@ -240,18 +242,19 @@ export async function loadPortfolio(): Promise<Portfolio> {
 
     if (error && error.code !== "PGRST116") {
       console.error("Error loading portfolio:", error);
+      throw error; // Throw so we don't overwrite local state with defaults
     }
 
-    const parsed = data?.data ? (data.data as Partial<Portfolio>) : {};
+    // Validate loaded data against schema
+    const rawData = data?.data && typeof data.data === "object" ? data.data : {};
+    const result = PortfolioSchema.partial().safeParse(rawData);
+    const parsed = (result.success ? result.data : rawData) as Partial<Portfolio>;
+
     let order = parsed.order && parsed.order.length ? parsed.order : base.order;
     // Migrate: inject "bio" after "profile" if missing from saved order
     if (!order.includes("bio")) {
       const profileIdx = order.indexOf("profile");
-      order = [
-        ...order.slice(0, profileIdx + 1),
-        "bio",
-        ...order.slice(profileIdx + 1),
-      ];
+      order = [...order.slice(0, profileIdx + 1), "bio", ...order.slice(profileIdx + 1)];
     }
     // Merge defensively against schema drift
     const customSections: CustomSection[] = (parsed.customSections ?? []).map(normalizeCustomSection);
@@ -276,7 +279,7 @@ export async function loadPortfolio(): Promise<Portfolio> {
       .select("handle")
       .eq("id", sessionData.session.user.id)
       .single();
-    
+
     const actualHandle = profile?.handle || base.handle;
 
     return {
@@ -287,11 +290,11 @@ export async function loadPortfolio(): Promise<Portfolio> {
       enabled: { ...base.enabled, ...(parsed.enabled ?? {}), ...customEnabled },
       sectionColors: parsed.sectionColors ?? {},
       order: mergedOrder,
-      socials: parsed.socials ?? [],
-      projects: parsed.projects ?? [],
-      blogs: parsed.blogs ?? [],
-      experience: parsed.experience ?? [],
-      achievements: parsed.achievements ?? [],
+      socials: (parsed.socials ?? []) as Social[],
+      projects: (parsed.projects ?? []) as Project[],
+      blogs: (parsed.blogs ?? []) as Blog[],
+      experience: (parsed.experience ?? []) as Experience[],
+      achievements: (parsed.achievements ?? []) as Achievement[],
       customSections,
     };
   } catch (err) {
@@ -368,4 +371,4 @@ export async function deleteAccount() {
   }
 }
 
-export const uid = () => Math.random().toString(36).slice(2, 9);
+export { uid };

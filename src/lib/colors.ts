@@ -70,7 +70,44 @@ const LEGACY_SECTION_COLORS: SectionColor[] = [
 
 export const SECTION_COLORS = [...Object.values(SECTION_COLOR_GROUPS).flat(), ...LEGACY_SECTION_COLORS];
 
+/** Default accent CSS var per built-in section */
+export const DEFAULT_ACCENT_CSS: Record<string, string> = {
+  profile: "var(--neon)",
+  bio: "var(--rose)",
+  socials: "var(--cyan)",
+  projects: "var(--neon)",
+  blogs: "var(--magenta)",
+  experience: "var(--indigo)",
+  achievements: "var(--amber)",
+};
+
 /** Resolves the CSS var string for a colour key. */
 export function colorToCss(key: string): string {
   return SECTION_COLORS.find((c) => c.key === key)?.css ?? "var(--neon)";
+}
+
+/** Resolves the live accent CSS var for a section, honouring user overrides */
+export function resolveAccent(id: string, sectionColors: Record<string, string>): string {
+  const key = sectionColors?.[id];
+  const css = key ? SECTION_COLORS.find((c) => c.key === key)?.css : null;
+  if (css) return css;
+  return DEFAULT_ACCENT_CSS[id] ?? "var(--neon)";
+}
+
+/** Remaps section colors when switching themes to maintain visual consistency. */
+export function remapSectionColorsForTheme(
+  sectionColors: Record<string, string>,
+  fromTheme: PortfolioThemeId,
+  toTheme: PortfolioThemeId,
+) {
+  const fromColors = SECTION_COLOR_GROUPS[fromTheme] ?? SECTION_COLOR_GROUPS.terminal;
+  const toColors = SECTION_COLOR_GROUPS[toTheme] ?? SECTION_COLOR_GROUPS.terminal;
+  return Object.fromEntries(
+    Object.entries(sectionColors).map(([sectionId, colorKey]) => {
+      const groupedIndex = fromColors.findIndex((color) => color.key === colorKey);
+      const fallbackIndex = SECTION_COLORS.findIndex((color) => color.key === colorKey);
+      const index = groupedIndex >= 0 ? groupedIndex : Math.max(0, fallbackIndex % toColors.length);
+      return [sectionId, toColors[index]?.key ?? toColors[0].key];
+    }),
+  );
 }
