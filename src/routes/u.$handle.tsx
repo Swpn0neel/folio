@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { loadPortfolioByHandle, type Portfolio } from "@/lib/portfolio";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -100,7 +100,7 @@ function PublicPortfolio() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 h-12 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 font-mono font-bold text-sm group leading-none">
             <Logo className="h-4 w-4 transition-opacity" />
-            <span className="opacity-70 group-hover:opacity-100 transition-opacity leading-none">~/folio/{portfolio.handle}</span>
+            <span className="opacity-70 group-hover:opacity-100 transition-opacity leading-none truncate max-w-[140px] sm:max-w-none">~/folio/{portfolio.handle}</span>
           </Link>
           {user && user.id === ownerId && (
             <Link
@@ -109,6 +109,17 @@ function PublicPortfolio() {
             >
               <ArrowLeft className="h-3 w-3" /> edit
             </Link>
+          )}
+          {!user && (
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1 font-mono text-[10px] sm:text-xs opacity-70 hover:opacity-100 transition-opacity"
+            >
+              make your own folio
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
           )}
         </div>
       </header>
