@@ -100,7 +100,13 @@ export function resolveAccent(id: string, sectionColors: Record<string, string>,
   const css = key ? SECTION_COLORS.find((c) => c.key === key)?.css : null;
   if (css) return css;
 
-  if (theme === "discord") return "#5865F2"; // Default to Blurple for Discord
+  if (theme === "vercel") return "#0070f3";
+  if (theme === "vercelDark") return "#fafafa";
+  if (theme === "material") return "oklch(0.62 0.17 305)";
+  if (theme === "editorial") return "#15202d";
+  if (theme === "studio") return "oklch(0.69 0.25 358)";
+  if (theme === "discord") return "#5865F2";
+
   return DEFAULT_ACCENT_CSS[id] ?? "var(--neon)";
 }
 

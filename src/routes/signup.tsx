@@ -118,7 +118,7 @@ function SignupPage() {
           label="email"
           type="email"
           required
-          placeholder="you@domain.dev"
+          placeholder="you@gmail.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />

@@ -5,6 +5,7 @@ import { Palette, Sparkles } from "lucide-react";
 import avatar from "@/assets/avatar-sample.jpg";
 import { PortfolioRenderer } from "@/components/portfolio/PortfolioRenderer";
 import { PORTFOLIO_THEMES, type Portfolio, type PortfolioThemeId } from "@/lib/portfolio";
+import { THEME_VIEW } from "@/config/themes";
 
 const MOCK_PORTFOLIO: Omit<Portfolio, "theme"> = {
   handle: "alex",
@@ -24,18 +25,12 @@ const MOCK_PORTFOLIO: Omit<Portfolio, "theme"> = {
     "custom:stack": true,
   },
   order: ["profile", "bio", "socials", "projects", "blogs", "experience", "achievements", "custom:stack"],
-  sectionColors: {
-    bio: "rose",
-    socials: "cyan",
-    blogs: "magenta",
-    experience: "indigo",
-    achievements: "amber",
-  },
   socials: [
     { id: "s1", label: "github", url: "#" },
     { id: "s2", label: "twitter", url: "#" },
-    { id: "s3", label: "linkedin", url: "#" },
-    { id: "s4", label: "website", url: "#" },
+    { id: "s3", label: "discord", url: "#" },
+    { id: "s4", label: "linkedin", url: "#" },
+    { id: "s5", label: "website", url: "#" },
   ],
   projects: [
     { id: "p1", name: "next-edge-cache", tech: "typescript · 2.4k ★", description: "zero-config edge cache for next.js" },
@@ -64,6 +59,7 @@ const MOCK_PORTFOLIO: Omit<Portfolio, "theme"> = {
       ],
     },
   ],
+  sectionColors: {}
 };
 
 export function PortfolioPreview() {
@@ -73,6 +69,7 @@ export function PortfolioPreview() {
     ...(MOCK_PORTFOLIO as Portfolio),
     theme,
   };
+
 
   return (
     <section id="preview" className="relative py-24 border-b border-border">
@@ -101,21 +98,33 @@ export function PortfolioPreview() {
           <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide pb-2">
             {PORTFOLIO_THEMES.map((t) => {
               const isActive = theme === t.id;
+              const themeConfig = t.id === "terminal" ? null : THEME_VIEW[t.id];
+              const accentColor = themeConfig?.accent || "var(--neon)";
+
               return (
                 <button
                   key={t.id}
                   onClick={() => setTheme(t.id)}
+                  style={{
+                    ["--theme-accent" as string]: accentColor,
+                    borderColor: isActive ? accentColor : undefined,
+                    color: isActive ? accentColor : undefined,
+                    backgroundColor: isActive ? `color-mix(in oklch, ${accentColor}, transparent 90%)` : undefined,
+                  }}
                   className={`relative px-4 py-2 font-mono text-xs transition-all duration-300 border group overflow-hidden shrink-0 ${
                     isActive
-                      ? "border-neon text-neon bg-neon/10 shadow-[0_0_15px_rgba(var(--color-neon),0.2)]"
+                      ? "shadow-[0_0_15px_rgba(var(--theme-accent),0.1)]"
                       : "border-border bg-background text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
                   }`}
                 >
                   {isActive && (
-                    <span className="absolute inset-0 bg-linear-to-r from-transparent via-neon/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+                    <span
+                      className="absolute inset-0 bg-linear-to-r from-transparent via-(--theme-accent)/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]"
+                      style={{ ["--theme-accent" as string]: accentColor } as any}
+                    />
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
-                    {isActive && <Sparkles className="h-3 w-3" />}
+                    {/* {isActive && <Sparkles className="h-3 w-3" />} */}
                     {t.label}
                   </span>
                 </button>

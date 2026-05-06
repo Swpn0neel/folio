@@ -91,7 +91,7 @@ function LoginPage() {
           label="email or handle"
           type="text"
           required
-          placeholder="you@domain.dev or handle"
+          placeholder="you@gmail.com or handle"
           value={loginId}
           onChange={(e) => setLoginId(e.target.value.replace(/\s+/g, ""))}
         />

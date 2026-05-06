@@ -13,14 +13,14 @@ export function Navbar() {
           <a href="#features" className="hover:text-neon transition-colors leading-none">./features</a>
           <a href="#preview" className="hover:text-neon transition-colors leading-none">./preview</a>
           <a href="#sections" className="hover:text-neon transition-colors leading-none">./sections</a>
-          <a href="#install" className="hover:text-neon transition-colors leading-none">./install</a>
+          <a href="#install" className="hover:text-neon transition-colors leading-none">/.claim</a>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/login" className="hidden sm:inline-flex h-8 px-3 text-xs font-mono items-center border border-border hover:border-neon hover:text-neon transition-colors">
             login
           </Link>
           <Link to="/signup" className="h-8 px-3 text-xs font-mono font-bold inline-flex items-center bg-neon text-background hover:shadow-glow-neon transition-shadow">
-            $ init
+            signup
           </Link>
         </div>
       </nav>

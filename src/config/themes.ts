@@ -120,7 +120,7 @@ export const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView
   studio: {
     id: "studio",
     shell: "bg-[#111111] text-white font-display",
-    frame: "rounded-xl border border-white/10 bg-[#111111] shadow-[0_28px_90px_rgba(244,63,94,0.18)]",
+    frame: "rounded-xl border border-white/10 bg-[#111111]",
     frameBar: "border-b border-white/10 bg-[#18181b] text-zinc-400",
     page: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.28),transparent_34%),linear-gradient(135deg,#111111,#171717_55%,#0f172a)] px-6 py-7 md:px-10 md:py-10",
     header: "flex flex-col md:flex-row gap-8 items-start md:items-center mb-10",
@@ -143,7 +143,7 @@ export const THEME_VIEW: Record<Exclude<PortfolioThemeId, "terminal">, ThemeView
   discord: {
     id: "discord",
     shell: "bg-[#313338] text-[#dbdee1] font-sans",
-    frame: "rounded-[24px] border border-[#1e1f22] bg-[#313338]",
+    frame: "rounded-xl border border-[#1e1f22] bg-[#313338]",
     frameBar: "border-b border-[#1e1f22] bg-[#2b2d31] text-[#949ba4]",
     page: "bg-[#313338] px-4 py-6 md:px-12 md:py-10",
     header: "flex flex-col bg-[#232428] rounded-[24px] p-6 pt-16 md:pt-20 relative mt-16 md:mt-20 mb-10",
