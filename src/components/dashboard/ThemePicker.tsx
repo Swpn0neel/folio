@@ -48,6 +48,7 @@ function ThemeSwatches({ id }: { id: PortfolioThemeId }) {
     material: ["#6750a4", "#ffb1c8", "#8bd8bd"],
     editorial: ["#111827", "#d97706", "#f8fafc"],
     studio: ["#111111", "#f43f5e", "#38bdf8"],
+    discord: ["#313338", "#5865F2", "#2b2d31"],
   };
 
   return (

@@ -1,5 +1,5 @@
 import { type Achievement } from "@/lib/portfolio";
-import { Field } from "@/components/dashboard/Field";
+import { Field, TextField } from "@/components/dashboard/Field";
 import { ListEditor } from "@/components/dashboard/ListEditor";
 import { Card } from "@/components/dashboard/Card";
 import { uid } from "@/utils/id";
@@ -32,7 +32,7 @@ export function AchievementsEditor({
         accent="text-amber"
         items={achievements}
         getId={(a) => a.id}
-        onAdd={() => onAdd({ id: uid(), title: "", meta: "" })}
+        onAdd={() => onAdd({ id: uid(), title: "", meta: "", description: "" })}
         onRemove={onRemove}
         onReorder={onReorder}
         renderItem={(a) => (
@@ -50,6 +50,15 @@ export function AchievementsEditor({
               onChange={(e) => onUpdate(a.id, { meta: e.target.value })}
               placeholder="open source recognition"
             />
+            <div className="sm:col-span-2">
+              <TextField
+                label="description"
+                hint="optional"
+                value={a.description ?? ""}
+                onChange={(e) => onUpdate(a.id, { description: e.target.value })}
+                placeholder="a brief summary or impact of this achievement..."
+              />
+            </div>
           </>
         )}
       />

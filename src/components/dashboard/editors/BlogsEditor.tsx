@@ -1,5 +1,5 @@
 import { type Blog } from "@/lib/portfolio";
-import { Field } from "@/components/dashboard/Field";
+import { Field, TextField } from "@/components/dashboard/Field";
 import { ListEditor } from "@/components/dashboard/ListEditor";
 import { Card } from "@/components/dashboard/Card";
 import { uid } from "@/utils/id";
@@ -28,7 +28,7 @@ export function BlogsEditor({
         accent="text-magenta"
         items={blogs}
         getId={(b) => b.id}
-        onAdd={() => onAdd({ id: uid(), title: "", url: "", meta: "" })}
+        onAdd={() => onAdd({ id: uid(), title: "", url: "", meta: "", description: "" })}
         onRemove={onRemove}
         onReorder={onReorder}
         renderItem={(b) => (
@@ -54,6 +54,15 @@ export function BlogsEditor({
               onChange={(e) => onUpdate(b.id, { meta: e.target.value })}
               placeholder="12 min · 18k reads"
             />
+            <div className="sm:col-span-2">
+              <TextField
+                label="description"
+                hint="optional"
+                value={b.description ?? ""}
+                onChange={(e) => onUpdate(b.id, { description: e.target.value })}
+                placeholder="a brief summary of the post..."
+              />
+            </div>
           </>
         )}
       />

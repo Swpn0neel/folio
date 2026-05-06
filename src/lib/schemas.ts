@@ -21,7 +21,7 @@ export const CustomSectionSchema = z.object({
   items: z.array(CustomSectionItemSchema),
 });
 
-export const PortfolioThemeIdSchema = z.enum(["terminal", "vercel", "vercelDark", "material", "editorial", "studio"]);
+export const PortfolioThemeIdSchema = z.enum(["terminal", "vercel", "vercelDark", "material", "editorial", "studio", "discord"]);
 
 export const SocialSchema = z.object({
   id: z.string(),
@@ -42,6 +42,7 @@ export const BlogSchema = z.object({
   title: z.string(),
   url: z.string(),
   meta: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const ExperienceSchema = z.object({
@@ -59,6 +60,7 @@ export const AchievementSchema = z.object({
   id: z.string(),
   title: z.string(),
   meta: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const PortfolioSchema = z.object({

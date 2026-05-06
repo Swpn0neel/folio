@@ -52,7 +52,7 @@ export type CustomSection = {
   items: CustomSectionItem[];
 };
 
-export type PortfolioThemeId = "terminal" | "vercel" | "vercelDark" | "material" | "editorial" | "studio";
+export type PortfolioThemeId = "terminal" | "vercel" | "vercelDark" | "material" | "editorial" | "studio" | "discord";
 
 export const PORTFOLIO_THEMES: Array<{
   id: PortfolioThemeId;
@@ -65,6 +65,7 @@ export const PORTFOLIO_THEMES: Array<{
   { id: "material", label: "material you", desc: "colorful cards with soft adaptive surfaces" },
   { id: "editorial", label: "editorial resume", desc: "polished writing-first professional page" },
   { id: "studio", label: "creative studio", desc: "bold portfolio grid with punchy accents" },
+  { id: "discord", label: "discord", desc: "chat-like interface with dark modern gamer aesthetics" },
 ];
 
 export function isPortfolioThemeId(value: unknown): value is PortfolioThemeId {
@@ -90,6 +91,7 @@ export type Blog = {
   title: string;
   url: string;
   meta?: string; // "12 min · 18k reads"
+  description?: string;
 };
 
 export type Experience = {
@@ -107,6 +109,7 @@ export type Achievement = {
   id: string;
   title: string;
   meta?: string;
+  description?: string;
 };
 
 export type Portfolio = {

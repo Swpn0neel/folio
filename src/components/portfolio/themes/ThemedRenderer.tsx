@@ -16,7 +16,7 @@ export function ThemedRenderer({
   const view = THEME_VIEW[theme];
   const visibleOrder = (portfolio.order || []).filter((id) => portfolio.enabled?.[id]);
   const sections = visibleOrder.filter((id) => id !== "profile");
-  const profileAccent = resolveAccent("profile", portfolio.sectionColors ?? {});
+  const profileAccent = resolveAccent("profile", portfolio.sectionColors ?? {}, theme);
   const showProfile = visibleOrder.includes("profile");
   
   const page = framed ? (

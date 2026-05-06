@@ -71,7 +71,9 @@ function PublicPortfolio() {
         : theme === "material"
           ? "bg-[linear-gradient(135deg,#fbf7ff_0%,#fff7ed_48%,#effdf7_100%)] text-[#1f1b24]"
           : theme === "editorial"
-            ? "bg-[#f8fafc] text-slate-950"
+          ? "bg-[#f8fafc] text-slate-950"
+          : theme === "discord"
+            ? "bg-[#313338] text-[#dbdee1]"
             : "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.28),transparent_34%),linear-gradient(135deg,#111111,#171717_55%,#0f172a)] text-white";
   const themedHeaderClass = theme === "terminal"
     ? "border-border"
@@ -82,7 +84,9 @@ function PublicPortfolio() {
         : theme === "material"
           ? "border-[#e7dff5] bg-[#fbf7ff]/90"
           : theme === "editorial"
-            ? "border-slate-300 bg-[#f8fafc]/90"
+          ? "border-slate-300 bg-[#f8fafc]/90"
+          : theme === "discord"
+            ? "border-[#1e1f22] bg-[#2b2d31]/90"
             : "border-white/10 bg-[#111111]/90";
   const themedLinkClass = theme === "terminal"
     ? "hover:text-neon"
@@ -92,7 +96,9 @@ function PublicPortfolio() {
       ? "hover:text-[#6750a4]"
       : theme === "studio"
         ? "hover:text-sky-300"
-        : "hover:text-amber-700";
+        : theme === "discord"
+          ? "hover:text-[#5865F2]"
+          : "hover:text-amber-700";
 
   return (
     <div className={`min-h-screen ${themedPageClass}`}>

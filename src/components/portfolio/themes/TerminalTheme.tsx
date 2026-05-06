@@ -49,7 +49,7 @@ export function TerminalTheme({ portfolio, framed = true }: { portfolio: Portfol
 }
 
 function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
-  const accentCss = resolveAccent(id, portfolio.sectionColors ?? {});
+  const accentCss = resolveAccent(id, portfolio.sectionColors ?? {}, "terminal");
   switch (id) {
     case "profile":
       return <ProfileBlock p={portfolio} accentCss={accentCss} />;
@@ -84,7 +84,7 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
         <Block icon={BookOpen} label="writing" accentCss={accentCss}>
           <div className="flex flex-col gap-4">
             {portfolio.blogs.map((b) => (
-              <Item key={b.id} title={b.title} meta={b.meta} url={b.url} bare={true} />
+              <Item key={b.id} title={b.title} meta={b.meta} desc={b.description} url={b.url} bare={true} />
             ))}
           </div>
         </Block>
@@ -107,7 +107,7 @@ function Section({ id, portfolio }: { id: SectionId; portfolio: Portfolio }) {
       return portfolio.achievements?.length ? (
         <Block icon={Award} label="achievements" accentCss={accentCss}>
           {portfolio.achievements.map((a) => (
-            <Item key={a.id} title={a.title} meta={a.meta} />
+            <Item key={a.id} title={a.title} meta={a.meta} desc={a.description} />
           ))}
         </Block>
       ) : null;

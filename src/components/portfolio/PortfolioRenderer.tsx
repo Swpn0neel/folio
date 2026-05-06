@@ -4,6 +4,7 @@ import { VercelTheme } from "./themes/VercelTheme";
 import { MaterialTheme } from "./themes/MaterialTheme";
 import { EditorialTheme } from "./themes/EditorialTheme";
 import { StudioTheme } from "./themes/StudioTheme";
+import { DiscordTheme } from "./themes/DiscordTheme";
 
 export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Portfolio; framed?: boolean }) {
   if (!portfolio) return null;
@@ -23,6 +24,8 @@ export function PortfolioRenderer({ portfolio, framed = true }: { portfolio: Por
       return <EditorialTheme portfolio={portfolio} framed={framed} />;
     case "studio":
       return <StudioTheme portfolio={portfolio} framed={framed} />;
+    case "discord":
+      return <DiscordTheme portfolio={portfolio} framed={framed} />;
     default:
       return <TerminalTheme portfolio={portfolio} framed={framed} />;
   }

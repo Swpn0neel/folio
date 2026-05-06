@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
@@ -13,9 +14,11 @@
   --radius-3xl: 0px;
   --radius-4xl: 0px;
 
-  --font-display: "JetBrains Mono", ui-monospace, monospace;
-  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Playfair Display", serif;
+  --font-body: "Lora", serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -187,8 +190,11 @@
   .border-neon { border-color: var(--neon); }
   .border-magenta { border-color: var(--magenta); }
   .border-cyan { border-color: var(--cyan); }
-  .font-display { font-family: var(--font-mono); }
+  .font-display { font-family: var(--font-display); }
   .font-mono { font-family: var(--font-mono); }
+  .font-serif { font-family: var(--font-serif); }
+  .font-body { font-family: var(--font-body); }
+  .font-outfit { font-family: "Outfit", sans-serif; }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

@@ -105,7 +105,7 @@ export function useDashboard() {
       };
     });
 
-  const sc = (id: string) => resolveAccent(id, portfolio.sectionColors ?? {});
+  const sc = (id: string) => resolveAccent(id, portfolio.sectionColors ?? {}, portfolio.theme ?? "terminal");
 
   const reset = () => {
     if (confirm("reset portfolio to defaults? this clears local data.")) {

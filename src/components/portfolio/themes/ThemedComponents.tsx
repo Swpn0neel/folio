@@ -4,7 +4,7 @@ import { getSocialIcon as socialIcon } from "@/lib/social-icons";
 import { resolveAccent } from "@/lib/colors";
 import { initials } from "@/utils/text";
 import { FormatText } from "@/components/FormatText";
-import type { CustomSection, CustomSectionItem, Portfolio, SectionId } from "@/lib/portfolio";
+import type { CustomSection, CustomSectionItem, Portfolio, PortfolioThemeId, SectionId } from "@/lib/portfolio";
 import type { ThemeView } from "@/config/themes";
 
 export function ThemedProfile({ p, view, accentCss }: { p: Portfolio; view: ThemeView; accentCss: string }) {
@@ -14,8 +14,8 @@ export function ThemedProfile({ p, view, accentCss }: { p: Portfolio; view: Them
       <ThemedAvatar p={p} view={view} accentCss={accentCss} />
       <div className="min-w-0">
         {showHandle && <p className={view.eyebrow} style={{ color: accentCss }}>@{p.handle || "you"}</p>}
-        <h1 className={`${view.title} mt-3 wrap-break-words`}>{p.fullName}<span className="animate-pulse" style={{ color: accentCss }}>.</span></h1>
-        {p.tagline && <p className={`${view.muted} mt-4 text-base md:text-lg leading-relaxed`} style={{ color: accentCss }}>{p.tagline}</p>}
+        <h1 className={`${view.title} wrap-break-words`}>{p.fullName}<span className="animate-pulse" style={{ color: accentCss }}>.</span></h1>
+        {p.tagline && <p className={`${view.muted} leading-relaxed`} style={{ color: accentCss }}>{p.tagline}</p>}
       </div>
     </section>
   );
@@ -49,7 +49,7 @@ export function ThemedAvatar({ p, view, accentCss }: { p: Portfolio; view: Theme
 }
 
 export function ThemedSection({ id, portfolio, view }: { id: SectionId; portfolio: Portfolio; view: ThemeView }) {
-  const accentCss = resolveAccent(id, portfolio.sectionColors ?? {});
+  const accentCss = resolveAccent(id, portfolio.sectionColors ?? {}, view.id as PortfolioThemeId);
   const custom = id.startsWith("custom:")
     ? (portfolio.customSections ?? []).find((section) => section.id === id)
     : null;
@@ -70,7 +70,7 @@ export function ThemedSection({ id, portfolio, view }: { id: SectionId; portfoli
       style={{ ["--section-accent" as string]: accentCss }}
     >
       <div className="mb-4 flex items-center gap-2">
-        <span className="h-2 w-2 shrink-0" style={{ background: accentCss }} />
+        {view.id !== "discord" && <span className="h-2 w-2 shrink-0" style={{ background: accentCss }} />}
         <h2 className={view.sectionTitle} style={{ color: accentCss }}>{label}</h2>
       </div>
       <div className="flex flex-col gap-3">{content}</div>
@@ -119,7 +119,7 @@ function renderThemedSectionContent(
     if (!portfolio.projects?.length) return null;
     const isEditorial = view.id === "editorial";
     return (
-      <div className={`grid grid-cols-1 items-stretch gap-4 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
+      <div className={`grid grid-cols-1 items-stretch gap-4 ${isEditorial ? "" : "sm:grid-cols-2"} ${(isEditorial || view.id === "vercelDark") && !isEditorial ? "sm:[&>*:nth-child(2)]:border-t-0 sm:[&>*:nth-child(2)]:pt-0" : ""}`}>
         {portfolio.projects.map((project) => (
           <ThemedItem key={project.id} view={view} accentCss={accentCss} title={project.name} meta={project.tech} desc={project.description} url={project.url} />
         ))}
@@ -129,7 +129,7 @@ function renderThemedSectionContent(
   if (id === "blogs") {
     return portfolio.blogs?.length
       ? portfolio.blogs.map((blog) => (
-          <ThemedItem key={blog.id} view={view} accentCss={accentCss} title={blog.title} meta={blog.meta} url={blog.url} />
+          <ThemedItem key={blog.id} view={view} accentCss={accentCss} title={blog.title} meta={blog.meta} desc={blog.description} url={blog.url} />
         ))
       : null;
   }
@@ -156,7 +156,7 @@ function renderThemedSectionContent(
   if (id === "achievements") {
     return portfolio.achievements?.length
       ? portfolio.achievements.map((achievement) => (
-          <ThemedItem key={achievement.id} view={view} accentCss={accentCss} title={achievement.title} meta={achievement.meta} />
+          <ThemedItem key={achievement.id} view={view} accentCss={accentCss} title={achievement.title} meta={achievement.meta} desc={achievement.description} />
         ))
       : null;
   }
@@ -180,7 +180,7 @@ export function ThemedCustomItems({
   if (template === "linkCards") {
     const isEditorial = view.id === "editorial";
     return (
-      <div className={`grid grid-cols-1 items-stretch gap-3 ${isEditorial ? "" : "sm:grid-cols-2"}`}>
+      <div className={`grid grid-cols-1 items-stretch gap-3 ${isEditorial ? "" : "sm:grid-cols-2"} ${(isEditorial || view.id === "vercelDark") && !isEditorial ? "sm:[&>*:nth-child(2)]:border-t-0 sm:[&>*:nth-child(2)]:pt-0" : ""}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
         ))}
@@ -192,7 +192,7 @@ export function ThemedCustomItems({
     const isEditorial = view.id === "editorial";
     const useTwoCols = template === "gallery" || template === "stats" || !isEditorial;
     return (
-      <div className={`grid grid-cols-1 items-stretch ${isEditorial ? "gap-x-8" : "gap-x-3"} gap-y-3 ${useTwoCols ? "sm:grid-cols-2" : ""} ${isEditorial && useTwoCols ? "sm:[&>*:nth-child(2)]:border-t-0 sm:[&>*:nth-child(2)]:pt-0" : ""}`}>
+      <div className={`grid grid-cols-1 items-stretch ${isEditorial ? "gap-x-8" : "gap-x-3"} gap-y-3 ${useTwoCols ? "sm:grid-cols-2" : ""} ${(isEditorial || view.id === "vercelDark") && useTwoCols ? "sm:[&>*:nth-child(2)]:border-t-0 sm:[&>*:nth-child(2)]:pt-0" : ""}`}>
         {section.items.map((item) => (
           <ThemedCustomItem key={item.id} item={item} view={view} accentCss={accentCss} template={template} />
         ))}

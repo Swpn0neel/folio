@@ -51,6 +51,14 @@ export const SECTION_COLOR_GROUPS: Record<PortfolioThemeId, SectionColor[]> = {
     { key: "ultraviolet", label: "ultraviolet", css: "oklch(0.66 0.24 300)" },
     { key: "laserAqua", label: "laser aqua", css: "oklch(0.82 0.15 190)" },
   ],
+  discord: [
+    { key: "blurple", label: "blurple", css: "#5865F2" },
+    { key: "online", label: "online", css: "#23A55A" },
+    { key: "idle", label: "idle", css: "#F0B232" },
+    { key: "dnd", label: "dnd", css: "#F23F43" },
+    { key: "link", label: "link blue", css: "#00A8FC" },
+    { key: "white", label: "active", css: "#FFFFFF" },
+  ],
 };
 
 const LEGACY_SECTION_COLORS: SectionColor[] = [
@@ -87,10 +95,12 @@ export function colorToCss(key: string): string {
 }
 
 /** Resolves the live accent CSS var for a section, honouring user overrides */
-export function resolveAccent(id: string, sectionColors: Record<string, string>): string {
+export function resolveAccent(id: string, sectionColors: Record<string, string>, theme?: PortfolioThemeId): string {
   const key = sectionColors?.[id];
   const css = key ? SECTION_COLORS.find((c) => c.key === key)?.css : null;
   if (css) return css;
+
+  if (theme === "discord") return "#5865F2"; // Default to Blurple for Discord
   return DEFAULT_ACCENT_CSS[id] ?? "var(--neon)";
 }
 
